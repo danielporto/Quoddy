@@ -12,7 +12,7 @@ class ProfilePicController
 		{
 			println( "params.userId found: ${params.id}");
 			String filePath = 
-				"/development/projects/fogbeam/quoddy/quoddy2/profilepics/${params.id}/${params.id}_profile_thumbnail48x48.jpg";
+				"/home/dcfp/devel/Quoddy/git/Quoddy/profilepics/${params.id}/${params.id}_profile_thumbnail48x48.jpg";
 			println( "filepath is ${filePath}");
 			File thumbnailFile = new File(filePath);
 			byte[] image = thumbnailFile.getBytes();

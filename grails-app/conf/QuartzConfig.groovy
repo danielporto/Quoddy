@@ -11,7 +11,7 @@ quartz {
 		threadPool.threadCount=10
 		threadPool.class='org.quartz.simpl.SimpleThreadPool'	
 		jobStore.class='org.quartz.impl.jdbcjobstore.JobStoreTX'
-		jobStore.driverDelegateClass='org.quartz.impl.jdbcjobstore.PostgreSQLDelegate'
+		jobStore.driverDelegateClass='org.quartz.impl.jdbcjobstore.StdJDBCDelegate'
 		jobStore.tablePrefix='QRTZ_'
 		jobStore.dataSource='myDS'
     }

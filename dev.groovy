@@ -7,10 +7,10 @@ enable.self.registration=true;
 created.accounts.backingStore="localdb";
 
 dataSource.pooled=true
-dataSource.driverClassName="org.postgresql.Driver"
-dataSource.username="postgres"
-dataSource.password=""
+dataSource.driverClassName="com.mysql.jdbc.Driver"
+dataSource.username="root"
+dataSource.password="101010"
 dataSource.logSql=false
 
 dataSource.dbCreate="update"
-dataSource.url="jdbc:postgresql:quoddy2"
+dataSource.url="jdbc:mysql://localhost:53306/quoddy2"

@@ -2,10 +2,10 @@
 dataSource {
 	pooled = true
 	// driverClassName = "org.hsqldb.jdbcDriver"
-	driverClassName = "org.postgresql.Driver"
+	driverClassName = "com.mysql.jdbc.Driver"
 	// username = "sa"
-	username = "postgres"
-	password = ""
+	username = "root"
+	password = "101010"
 	// password = ""
 	logSql=false
 }
@@ -19,7 +19,7 @@ environments {
 	development {
 		dataSource {
 			dbCreate = "update" // one of 'create', 'create-drop','update'
-			url = "jdbc:postgresql:quoddy2";
+			url = "jdbc:mysql://localhost:53306/quoddy2";
 			// dbCreate = "create-drop"
 			// url = "jdbc:hsqldb:mem:devDb
 		}
@@ -27,13 +27,15 @@ environments {
 	test {
 		dataSource {
 			dbCreate = "create-drop"
-			url = "jdbc:hsqldb:mem:testDb"
+			// dbCreate = "create-drop"
+			url = "jdbc:mysql://localhost:53306/quoddy2";
 		}
 	}
 	production {
 		dataSource {
 			dbCreate = "update" // one of 'create', 'create-drop','update'
-			url = "jdbc:postgresql:quoddy2"
+			// dbCreate = "create-drop"
+			url = "jdbc:mysql://localhost:53306/quoddy2";
 		}
 	}
 }
