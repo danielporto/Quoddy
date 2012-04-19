@@ -7,7 +7,7 @@ dataSource {
 	username = "root"
 	password = "101010"
 	// password = ""
-	logSql=false
+	logSql=true
 }
 hibernate {
     cache.use_second_level_cache=true
