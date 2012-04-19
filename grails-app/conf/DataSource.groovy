@@ -2,6 +2,7 @@
 dataSource {
 	pooled = true
 	// driverClassName = "org.hsqldb.jdbcDriver"
+	//driverClassName = "txstore.scratchpad.rdbms.jdbc.TxMudDriver"
 	driverClassName = "com.mysql.jdbc.Driver"
 	// username = "sa"
 	username = "root"
