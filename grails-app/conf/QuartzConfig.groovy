@@ -1,7 +1,7 @@
 
 quartz {
     autoStartup=true
-    jdbcStore=true
+    //jdbcStore=false
     waitForJobsToCompleteOnShutdown=true
     exposeSchedulerInRepository = false
 
@@ -10,10 +10,11 @@ quartz {
         scheduler.skipUpdateCheck=true
 		threadPool.threadCount=10
 		threadPool.class='org.quartz.simpl.SimpleThreadPool'	
-		jobStore.class='org.quartz.impl.jdbcjobstore.JobStoreTX'
-		jobStore.driverDelegateClass='org.quartz.impl.jdbcjobstore.StdJDBCDelegate'
-		jobStore.tablePrefix='QRTZ_'
-		jobStore.dataSource='myDS'
+		jobStore.class='org.quartz.simpl.RAMJobStore'
+//		jobStore.class='org.quartz.impl.jdbcjobstore.JobStoreTX'
+//		jobStore.driverDelegateClass='org.quartz.impl.jdbcjobstore.StdJDBCDelegate'
+//		jobStore.tablePrefix='QRTZ_'
+//		jobStore.dataSource='myDS'
     }
 }
 
