@@ -1,9 +1,12 @@
 package org.fogbeam.quoddy
 
 import java.util.List;
+import org.fogbeam.quoddy.DirectConnectionManagerService;
 
 class LocalFriendService 
 {
+	def directConnectionManagerService;
+	
 	public void addToFollow( final User destinationUser, final User targetUser )
 	{
 		IFollowCollection iFollowCollection = IFollowCollection.findByOwnerUuid( destinationUser.uuid );
@@ -100,6 +103,19 @@ class LocalFriendService
 	public List<User> listIFollow( final User user )
 	{
 		List<User> peopleIFollow = new ArrayList<User>();
+
+		def conn = directConnectionManagerService.getConnection();
+		//first get ifollow_collection_id
+		
+		String sql1= " select id,version,date_created,owner_uuid from ifollow_collection where owner_uuid='"+user.uuid+"'";
+		def row = conn.firstRow(sql1);
+		if(row.size()==0){
+			println("no user found");
+			return peopleIFollow;
+		}
+		
+		//String sql = "select ifollow_collection_id, i_follow_string from ifollow_collection_i_follow where ifollow_collection_id="+row.id;
+		
 		IFollowCollection iFollowCollection = IFollowCollection.findByOwnerUuid( user.uuid );
 		
 		Set<String> iFollowUuids = iFollowCollection.iFollow;
