@@ -48,12 +48,22 @@ class UserStreamService
 	{
 		List<UserStream> streams = new ArrayList<UserStream>();
 		
-		List<UserStream> tempStreams = UserStream.executeQuery( "select stream from UserStream as stream where stream.owner = :owner and stream.definedBy = :definedBy", 
-																['owner':user,'definedBy':UserStream.DEFINED_USER] );
-		if( tempStreams )
-		{
-			streams.addAll( tempStreams );
+		def conn = DirectConnectionManagerService.getConnection();
+		
+		String sql = "select id, version,date_created,defined_by,name,owner_id,uuid from \
+		user_stream where owner_id="+user.id+" and defined_by='"+UserStream.DEFINED_USER+"'";
+		
+		
+		conn.eachRow(sql){row ->
+			streams.add(new UserStream(name:row.name, uuid:row.uuid,definedBy:UserStream.DEFINED_USER,owner:user,dateCreated:row.date_created));
 		}
+		
+//		List<UserStream> tempStreams = UserStream.executeQuery( "select stream from UserStream as stream where stream.owner = :owner and stream.definedBy = :definedBy", 
+//																['owner':user,'definedBy':UserStream.DEFINED_USER] );
+//		if( tempStreams )
+//		{
+//			streams.addAll( tempStreams );
+//		}
 
 		
 		return streams;

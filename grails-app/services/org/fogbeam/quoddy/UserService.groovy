@@ -1,5 +1,6 @@
 package org.fogbeam.quoddy;
 
+import java.util.Date;
 import java.util.List
 
 import org.fogbeam.quoddy.profile.Profile
@@ -18,7 +19,17 @@ class UserService {
 	
 	public User findUserByUserId( String userId )
 	{
-		User user = User.findByUserId( userId );
+		def conn = DirectConnectionManagerService.getConnection();
+		String sql = "select id, version, current_status_id, date_created, email, first_name, full_name,\
+		last_name,	profile_id,	user_id, uuid from uzer where user_id='"+userId+"'";
+		def row = conn.firstRow(sql)
+		User user = null
+		if(row.size()==0){
+			println "no user found"
+		}else{
+		//User user = User.findByUserId( userId );
+			user = new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
+		}
 		
 		return user;
 	}	

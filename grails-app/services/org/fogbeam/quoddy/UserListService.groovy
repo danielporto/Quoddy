@@ -1,5 +1,6 @@
 package org.fogbeam.quoddy
 
+import java.util.Date;
 import java.util.List;
 
 class UserListService
@@ -8,12 +9,19 @@ class UserListService
 	{
 		List<UserList> lists = new ArrayList<UserList>();
 		
-		List<UserList> tempLists = UserList.executeQuery( "select list from UserList as list where list.owner = :owner",
-														  ['owner':user] );
-		if( tempLists )
-		{
-			lists.addAll( tempLists );
+		def conn = DirectConnectionManagerService.getConnection();
+		
+		String sql = "select id ,version,date_created, description, name,owner_id, uuid\
+				from user_list  where owner_id="+user.id;
+		conn.eachRow(sql){row ->
+			lists.add(new UserList(name:row.name,uuid:row.uuid, description:row.description, owner:user,dateCreated:row.date_created));
 		}
+//		List<UserList> tempLists = UserList.executeQuery( "select list from UserList as list where list.owner = :owner",
+//														  ['owner':user] );
+//		if( tempLists )
+//		{
+//			lists.addAll( tempLists );
+//		}
 		
 		return lists;	
 	}

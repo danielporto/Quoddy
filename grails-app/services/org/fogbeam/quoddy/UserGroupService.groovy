@@ -76,12 +76,22 @@ class UserGroupService
 	{
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		
-		List<UserGroup> tempGroups = UserGroup.executeQuery( "select ugroup from UserGroup as ugroup, User as user where user = ? and ( ugroup.owner = user OR user in elements (ugroup.groupMembers))", [user] );
-
-		if( tempGroups )
-		{
-			groups.addAll( tempGroups );
+		def conn = DirectConnectionManagerService.getConnection();
+		
+		String sql = "select user_group.id, user_group.version, user_group.date_created, user_group.description, user_group.name, user_group.owner_id, user_group.require_join_confirmation, user_group.uuid"+ 
+			" from user_group, uzer where uzer.id="+user.id+"  and (user_group.owner_id=uzer.id  or uzer.id in (" + 
+                "select user_id from  user_group_uzer  where user_group.id=user_group_uzer.user_group_group_members_id))";
+				
+		conn.eachRow(sql){row ->
+			groups.add(new UserGroup(name:row.name,uuid:row.uuid, description:row.description, requireJoinConfirmation:row.require_join_confirmation,owner:user,dateCreated:row.date_created));
 		}
+		
+//		List<UserGroup> tempGroups = UserGroup.executeQuery( "select ugroup from UserGroup as ugroup, User as user where user = ? and ( ugroup.owner = user OR user in elements (ugroup.groupMembers))", [user] );
+//
+//		if( tempGroups )
+//		{
+//			groups.addAll( tempGroups );
+//		}
 		
 		
 		return groups;
