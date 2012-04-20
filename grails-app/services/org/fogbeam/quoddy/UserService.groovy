@@ -36,7 +36,18 @@ class UserService {
 	
 	public User findUserByUuid( final String uuid )
 	{
-		User user = User.findByUuid( uuid );
+		//User user = User.findByUuid( uuid );
+		def conn = DirectConnectionManagerService.getConnection();
+		String sql = "select id ,version,current_status_id, date_created, email, first_name, full_name, last_name, profile_id, user_id, "+
+		             "uuid from uzer where uuid='"+uuid+"'"
+		def row = conn.firstRow(sql)
+		User user = null
+		if(row.size()==0){
+			println "no user found"
+		}else{
+			//User user = User.findByUserId( userId );			 
+			user = new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
+		}
 		
 		return user;
 			
@@ -133,11 +144,17 @@ class UserService {
 	public List<User> findAllUsers() 
 	{
 		List<User> users = new ArrayList<User>();
-		List<User> temp = User.findAll();
-		if( temp )
-		{
-			users.addAll( temp );	
+		def conn = DirectConnectionManagerService.getConnection();
+		String sql = "select id, version,current_status_id,date_created,email,first_name ,full_name ,last_name ,profile_id,user_id ,uuid  from uzer";
+		
+		conn.eachRow(sql){row ->
+			users.add(new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email));
 		}
+//		List<User> temp = User.findAll();
+//		if( temp )
+//		{
+//			users.addAll( temp );	
+//		}
 	
 		return users;	
 	}
