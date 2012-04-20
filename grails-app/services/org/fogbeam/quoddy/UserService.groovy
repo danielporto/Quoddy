@@ -24,7 +24,7 @@ class UserService {
 		last_name,	profile_id,	user_id, uuid from uzer where user_id='"+userId+"'";
 		def row = conn.firstRow(sql)
 		User user = null
-		if(row.size()==0){
+		if(row ==null){
 			println "no user found"
 		}else{
 		//User user = User.findByUserId( userId );
