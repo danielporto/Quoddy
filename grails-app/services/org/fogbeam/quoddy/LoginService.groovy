@@ -17,12 +17,12 @@ class LoginService
 		User user = null;
 		
 		// TODO: deal with authsource stuff, conver this stuff to use JAAS?
-		//LocalAccount account = localAccountService.findAccountByUserId( userId );
+		LocalAccount account = localAccountService.findAccountByUserId( userId );
 		
-		def conn = DirectConnectionManagerService.getConnection();
-		String sql = "select id, version, password , username , uuid from local_account where username='"+userId+"'";
-		def row = conn.firstRow(sql)
-		LocalAccount account = new LocalAccount(row.uuid,userId,row.password)
+//		def conn = DirectConnectionManagerService.getConnection();
+//		String sql = "select id, version, password , username , uuid from local_account where username='"+userId+"'";
+//		def row = conn.firstRow(sql)
+//		LocalAccount account = new LocalAccount(row.uuid,userId,row.password)
 		
 		boolean trySecondAuthSource = true;
 		if( account )

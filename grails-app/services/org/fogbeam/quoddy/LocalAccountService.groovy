@@ -10,8 +10,11 @@ class LocalAccountService
 {
 	public LocalAccount findAccountByUserId( final String userId )
 	{
-		LocalAccount account = LocalAccount.findByUsername( userId );
-		
+		//LocalAccount account = LocalAccount.findByUsername( userId );
+		def conn = DirectConnectionManagerService.getConnection();
+		String sql = "select id, version, password , username , uuid from local_account where username='"+userId+"'";
+		def row = conn.firstRow(sql)
+		LocalAccount account = new LocalAccount(row.uuid,userId,row.password)
 		return account;
 	}
 	
