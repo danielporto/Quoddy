@@ -9,6 +9,22 @@ class LocalFriendService
 {
 	def directConnectionManagerService; 
 	
+	
+	public FriendCollection findByOwnerUuid( final String uuid )
+	{
+		def conn = DirectConnectionManagerService.getConnection();
+		String sql = "select id, version, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+uuid+"'";
+		
+		def row = conn.firstRow(sql)
+		FriendCollection friendsCollection = new FriendCollection(dateCreated:row.date_created,uuid:row.owner_uuid)
+		
+		friendsCollection.friends= new HashSet<String>();
+		sql="select friend_collection_id , friends_string from friend_collection_friends where friend_collection_id="+row.id;
+		conn.eachRow(sql){row2 ->  friendsCollection.friends.add(row2.friends_string); }
+		return 	friendsCollection;
+	}
+	
+	
 	public void addToFollow( final User destinationUser, final User targetUser )
 	{
 		//IFollowCollection iFollowCollection = IFollowCollection.findByOwnerUuid( destinationUser.uuid );
@@ -105,25 +121,14 @@ class LocalFriendService
 	public List<User> listFriends( final User user )
 	{
 		List<User> friends = new ArrayList<User>();
-		//FriendCollection friendsCollection = FriendCollection.findByOwnerUuid( user.uuid );
-	
-		def conn = DirectConnectionManagerService.getConnection();
-		String sql = "select id, version, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+user.uuid+"'";
-		println "query1 "+sql
-		def row = conn.firstRow(sql)
-		FriendCollection friendsCollection = new FriendCollection(dateCreated:row.date_created,uuid:row.owner_uuid)
-		
-		friendsCollection.friends= new HashSet<String>();
-		sql="select friend_collection_id , friends_string from friend_collection_friends where friend_collection_id="+row.id;
-		println "query2 " +sql 
-		conn.eachRow(sql){row2 ->
-		  friendsCollection.friends.add(row2.friends_string);
-		}
+		FriendCollection friendsCollection = this.findByOwnerUuid( user.uuid );
 
 		Set<String> friendUuids = friendsCollection.friends;
 		for( String friendUuid : friendUuids )
 		{
-			User friend = User.findByUuid( friendUuid );
+			//User friend = User.findByUuid( friendUuid );
+			def userService = new UserService();
+			User friend = userService.findUserByUuid(friendUuid);
 			friends.add( friend );
 		}
 		println "returning friends: ${friends}";
@@ -225,4 +230,6 @@ class LocalFriendService
 		return openFriendRequests;		
 	}
 
+	
+	
 }
