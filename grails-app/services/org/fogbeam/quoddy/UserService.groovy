@@ -41,7 +41,16 @@ class UserService {
 		return user;
 			
 	}
-	
+//	public User findUserByUuid( final String uuid )
+//	{
+//		def conn = DirectConnectionManagerService.getConnection();
+//		String sql = "";
+//		def row = conn.firstRow(sql)
+//
+//		return  new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email);
+//			
+//	}
+//	
 	public void createUser( User user ) 
 	{
 		

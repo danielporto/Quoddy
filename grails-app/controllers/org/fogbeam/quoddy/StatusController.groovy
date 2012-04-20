@@ -57,7 +57,6 @@ class StatusController {
 			// TODO: if the user update was successful
 			Activity activity = new Activity(content:newStatus.text);
 			ShareTarget streamPublic = ShareTarget.findByName( ShareTarget.STREAM_PUBLIC );
-
 			
 			activity.title = "Internal Activity";
 			activity.url = new URL( "http://www.example.com" );

@@ -65,16 +65,24 @@ class LocalFriendService
 	public List<User> listFriends( final User user )
 	{
 		List<User> friends = new ArrayList<User>();
-		FriendCollection friendsCollection = FriendCollection.findByOwnerUuid( user.uuid );
+		//FriendCollection friendsCollection = FriendCollection.findByOwnerUuid( user.uuid );
+	
+		def conn = DirectConnectionManagerService.getConnection();
+		String sql = "select id, version, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+user.uuid+"'";
+		def row = conn.firstRow(sql)
+		FriendCollection friendsCollection = new FriendCollection(id:row.id,version:row.version, dateCreated:row.date_created,uuid:row.owner_uuid)
 		
+		sql="select friend_collection_id , friends_string from friend_collection_friends where friend_collection_id="+friendsCollection.id;
+		conn.eachRow(sql){row2 ->
+		  friendsCollection.friends.add(row2.friends_string);
+		}
+
 		Set<String> friendUuids = friendsCollection.friends;
-		
 		for( String friendUuid : friendUuids )
 		{
 			User friend = User.findByUuid( friendUuid );
 			friends.add( friend );
 		}
-		
 		println "returning friends: ${friends}";
 		return friends;
 	}
