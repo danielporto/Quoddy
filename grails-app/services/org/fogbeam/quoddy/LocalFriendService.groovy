@@ -103,8 +103,10 @@ class LocalFriendService
 	public List<User> listIFollow( final User user )
 	{
 		List<User> peopleIFollow = new ArrayList<User>();
-
-		def conn = directConnectionManagerService.getConnection();
+//		directConnectionManagerService = new DirectConnectionManagerService();
+//		def conn = directConnectionManagerService.getConnection();
+		
+		def conn = DirectConnectionManagerService.getConnection();
 		//first get ifollow_collection_id
 		
 		String sql1= " select id,version,date_created,owner_uuid from ifollow_collection where owner_uuid='"+user.uuid+"'";
