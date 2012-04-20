@@ -172,7 +172,7 @@ class ActivityStreamService {
 					friends_added=true;
 				}
 				if(friends_added)
-					sb.deleteCharAt(sb.length());
+					sb.deleteCharAt(sb.length()-1);
 				else
 					sb.append("null");
 			
