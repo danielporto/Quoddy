@@ -109,10 +109,13 @@ class LocalFriendService
 	
 		def conn = DirectConnectionManagerService.getConnection();
 		String sql = "select id, version, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+user.uuid+"'";
+		println "query1 "+sql
 		def row = conn.firstRow(sql)
-		FriendCollection friendsCollection = new FriendCollection(id:row.id,version:row.version, dateCreated:row.date_created,uuid:row.owner_uuid)
+		FriendCollection friendsCollection = new FriendCollection(dateCreated:row.date_created,uuid:row.owner_uuid)
 		
-		sql="select friend_collection_id , friends_string from friend_collection_friends where friend_collection_id="+friendsCollection.id;
+		friendsCollection.friends= new HashSet<String>();
+		sql="select friend_collection_id , friends_string from friend_collection_friends where friend_collection_id="+row.id;
+		println "query2 " +sql 
 		conn.eachRow(sql){row2 ->
 		  friendsCollection.friends.add(row2.friends_string);
 		}
