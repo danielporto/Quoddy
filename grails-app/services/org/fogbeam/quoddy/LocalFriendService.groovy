@@ -93,18 +93,59 @@ class LocalFriendService
 		// "confirmed friends" group.
 //		FriendCollection friendCollectionCU = FriendCollection.findByOwnerUuid( currentUser.uuid );
 //		FriendCollection friendCollectionNF = FriendCollection.findByOwnerUuid( newFriend.uuid );
-//      FriendRequestCollection friendRequestsCU = FriendRequestCollection.findByOwnerUuid( currentUser.uuid );		
+      FriendRequestCollection friendRequestsCU = FriendRequestCollection.findByOwnerUuid( currentUser.uuid );		
 		FriendCollection friendCollectionCU = this.findFriendCollectionByOwnerUuid( currentUser.uuid );
 		FriendCollection friendCollectionNF = this.findFriendCollectionByOwnerUuid( newFriend.uuid );
-		FriendRequestCollection friendRequestsCU = this.findFriendRequestCollectionByOwnerUuid.findByOwnerUuid( currentUser.uuid );
-		
+//		FriendRequestCollection friendRequestsCU = this.findFriendRequestCollectionByOwnerUuid( currentUser.uuid );
+		println "REMOOOOOOOOOOOOOOOOVE"
 		friendRequestsCU.removeFromFriendRequests( newFriend.uuid );
-		friendCollectionCU.addToFriends( newFriend.uuid );
-		friendCollectionNF.addToFriends( currentUser.uuid );
 		
-		friendRequestsCU.save();
-		friendCollectionCU.save();
-		friendCollectionNF.save();
+//
+//		
+//		
+//		select
+//		friendrequ0_.friend_request_collection_id as friend1_0_,
+//		friendrequ0_.friend_requests_string as friend2_0_
+//	from
+//		friend_request_collection_friend_requests friendrequ0_
+//	where
+//		friendrequ0_.friend_request_collection_id=?
+//
+//		
+//		
+//		update
+//		friend_request_collection
+//	set
+//		version=?,
+//		date_created=?,
+//		owner_uuid=?
+//	where
+//		id=?
+//		and version=?
+//--------------
+//
+//delete
+//from
+//	friend_request_collection_friend_requests
+//where
+//	friend_request_collection_id=?
+
+		
+		println "REMOOOOOOOOOOOOOOOOVE"
+		println "AAAAAADDD to FRIENDS"
+		friendCollectionCU.addToFriends( newFriend.uuid );
+		println "AAAAAADDD to FRIENDS"
+		println "AAAAAADDD to FRIENDS2"
+		friendCollectionNF.addToFriends( currentUser.uuid );
+		println "AAAAAADDD to FRIENDS2"
+		
+		println "SSAAAAAAAAAAAVE1"
+		friendRequestsCU.save(flush:true);
+		println "SSAAAAAAAAAAAVE2"
+		friendCollectionCU.save(flush:true);
+		println "SSAAAAAAAAAAAVE3"
+		friendCollectionNF.save(flush:true);
+		println "SSAAAAAAAAAAAVE-cabou"
 		
 
 	}
@@ -237,10 +278,12 @@ class LocalFriendService
 		FriendRequestCollection friendRequestCollection = this.findFriendRequestCollectionByOwnerUuid( user.uuid );
 		
 		Set<String> unconfirmedFriendUuids = friendRequestCollection.friendRequests;
-		
+		def userService = new UserService()
 		for( String unconfirmedFriendUuid : unconfirmedFriendUuids )
 		{
-			User unconfirmedFriend = User.findByUuid( unconfirmedFriendUuid );
+			
+			//User unconfirmedFriend = User.findByUuid( unconfirmedFriendUuid );
+			User unconfirmedFriend =userService.findUserByUuid( unconfirmedFriendUuid );
 			FriendRequest friendRequest = new FriendRequest( user, unconfirmedFriend );
 			openFriendRequests.add( friendRequest );
 		}
