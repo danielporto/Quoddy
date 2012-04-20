@@ -1,5 +1,6 @@
 package org.fogbeam.quoddy;
 
+import java.util.Date;
 import org.fogbeam.quoddy.Activity;
 import org.fogbeam.quoddy.StatusUpdate;
 import org.fogbeam.quoddy.User;
@@ -104,9 +105,19 @@ class StatusController {
 			println "logged in; so proceeding...";
 			
 			// get our user
-			user = userService.findUserByUserId( session.user.userId );
+			//user = userService.findUserByUserId( session.user.userId );
 			
-			updates.addAll( user.oldStatusUpdates.sort { it.dateCreated }.reverse() );
+			//updates.addAll( user.oldStatusUpdates.sort { it.dateCreated }.reverse() );
+			def conn = DirectConnectionManagerService.getConnection();
+			
+			String sql = "select id from uzer where user_id='"+session.user.userId+"'";
+			def row1 = conn.firstRow(sql);
+			sql = "select creator_id, id,version,creator_id,date_created,text from status_update where creator_id=" + row1.id;
+			conn.eachRow(sql){row ->
+				updates.add(new StatusUpdate(text:row.text,creator:session.user,dateCreated:row.date_created));
+			}
+			if(updates.size>0)
+				updates = updates.sort(it.dateCreated).reverse();
 		}
 		
 		[updates:updates]
