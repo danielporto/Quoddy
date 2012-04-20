@@ -133,7 +133,6 @@ class UserService {
 	public void confirmFriend( User currentUser, User newFriend )
 	{
 		friendService.confirmFriend( currentUser, newFriend );
-		
 	}
 	
 	public void addToFriends( User currentUser, User newFriend )

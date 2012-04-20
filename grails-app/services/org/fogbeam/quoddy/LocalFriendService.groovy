@@ -9,8 +9,8 @@ class LocalFriendService
 {
 	def directConnectionManagerService; 
 	
-	
-	public FriendCollection findByOwnerUuid( final String uuid )
+	//added
+	public FriendCollection findFriendCollectionByOwnerUuid( final String uuid )
 	{
 		def conn = DirectConnectionManagerService.getConnection();
 		String sql = "select id, version, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+uuid+"'";
@@ -23,7 +23,21 @@ class LocalFriendService
 		conn.eachRow(sql){row2 ->  friendsCollection.friends.add(row2.friends_string); }
 		return 	friendsCollection;
 	}
-	
+
+	//added
+	public FriendRequestCollection findFriendRequestCollectionByOwnerUuid( final String uuid )
+	{
+		def conn = DirectConnectionManagerService.getConnection();
+		String sql = "select id, version,  date_created, owner_uuid from	friend_request_collection where	owner_uuid='"+uuid+"'";
+
+		def row = conn.firstRow(sql)
+		FriendRequestCollection friendsRequestCollection = new FriendRequestCollection(dateCreated:row.date_created,uuid:row.owner_uuid)
+		
+		friendsRequestCollection.friendRequests= new HashSet<String>();
+		sql="select friend_request_collection_id , friend_requests_string from friend_request_collection_friend_requests where friend_request_collection_id="+row.id;
+		conn.eachRow(sql){row2 ->  friendsRequestCollection.friendRequests.add(row2.friend_requests_string); }
+		return 	friendsRequestCollection;
+	}
 	
 	public void addToFollow( final User destinationUser, final User targetUser )
 	{
@@ -77,9 +91,12 @@ class LocalFriendService
 		// currentUser, and then insert an entry for newUser into currentUser's
 		// "confirmed friends" group and an entry for currentUser into newUser's
 		// "confirmed friends" group.
-		FriendCollection friendCollectionCU = FriendCollection.findByOwnerUuid( currentUser.uuid );
-		FriendCollection friendCollectionNF = FriendCollection.findByOwnerUuid( newFriend.uuid );
-		FriendRequestCollection friendRequestsCU = FriendRequestCollection.findByOwnerUuid( currentUser.uuid );
+//		FriendCollection friendCollectionCU = FriendCollection.findByOwnerUuid( currentUser.uuid );
+//		FriendCollection friendCollectionNF = FriendCollection.findByOwnerUuid( newFriend.uuid );
+//      FriendRequestCollection friendRequestsCU = FriendRequestCollection.findByOwnerUuid( currentUser.uuid );		
+		FriendCollection friendCollectionCU = this.findFriendCollectionByOwnerUuid( currentUser.uuid );
+		FriendCollection friendCollectionNF = this.findFriendCollectionByOwnerUuid( newFriend.uuid );
+		FriendRequestCollection friendRequestsCU = this.findFriendRequestCollectionByOwnerUuid.findByOwnerUuid( currentUser.uuid );
 		
 		friendRequestsCU.removeFromFriendRequests( newFriend.uuid );
 		friendCollectionCU.addToFriends( newFriend.uuid );
@@ -121,7 +138,7 @@ class LocalFriendService
 	public List<User> listFriends( final User user )
 	{
 		List<User> friends = new ArrayList<User>();
-		FriendCollection friendsCollection = this.findByOwnerUuid( user.uuid );
+		FriendCollection friendsCollection = this.findFriendCollectionByOwnerUuid( user.uuid );
 
 		Set<String> friendUuids = friendsCollection.friends;
 		for( String friendUuid : friendUuids )
@@ -216,7 +233,8 @@ class LocalFriendService
 	{
 		List<FriendRequest> openFriendRequests = new ArrayList<FriendRequest>();
 
-		FriendRequestCollection friendRequestCollection = FriendRequestCollection.findByOwnerUuid( user.uuid );
+		//FriendRequestCollection friendRequestCollection = FriendRequestCollection.findByOwnerUuid( user.uuid );
+		FriendRequestCollection friendRequestCollection = this.findFriendRequestCollectionByOwnerUuid( user.uuid );
 		
 		Set<String> unconfirmedFriendUuids = friendRequestCollection.friendRequests;
 		
