@@ -22,7 +22,11 @@ class User implements Serializable
 		dateCreated()
     }
 
-    String uuid;
+//	//daniel - debug
+    Long id;
+	Long version;
+	
+	String uuid;
     String userId;
     Date dateCreated;
     Profile profile;

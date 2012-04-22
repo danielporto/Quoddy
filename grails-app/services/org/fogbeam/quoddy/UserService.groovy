@@ -28,7 +28,8 @@ class UserService {
 			println "no user found"
 		}else{
 		//User user = User.findByUserId( userId );
-			user = new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
+			//user = new User(id:row.id,version:row.version,uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
+			 user = new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
 		}
 		
 		return user;
@@ -46,7 +47,8 @@ class UserService {
 			println "no user found"
 		}else{
 			//User user = User.findByUserId( userId );			 
-			user = new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
+			user = new User(id:row.id,version:row.version,uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
+			//user = new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
 		}
 		
 		return user;

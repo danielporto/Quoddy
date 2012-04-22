@@ -15,11 +15,11 @@ class LocalFriendService
 		def conn = DirectConnectionManagerService.getConnection();
 		String sql = "select id, version, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+uuid+"'";
 		
-		def row = conn.firstRow(sql)
-		FriendCollection friendsCollection = new FriendCollection(dateCreated:row.date_created,uuid:row.owner_uuid)
-		
+		def row = conn.firstRow(sql);
+		FriendCollection friendsCollection = new FriendCollection(id_:row.id,version_:row.version, dateCreated:row.date_created,ownerUuid:row.owner_uuid);
+
 		friendsCollection.friends= new HashSet<String>();
-		sql="select friend_collection_id , friends_string from friend_collection_friends where friend_collection_id="+row.id;
+		sql="select friend_collection_id , friends_string from friend_collection_friends where friend_collection_id="+friendsCollection.id_;
 		conn.eachRow(sql){row2 ->  friendsCollection.friends.add(row2.friends_string); }
 		return 	friendsCollection;
 	}
@@ -31,8 +31,9 @@ class LocalFriendService
 		String sql = "select id, version,  date_created, owner_uuid from	friend_request_collection where	owner_uuid='"+uuid+"'";
 
 		def row = conn.firstRow(sql)
-		FriendRequestCollection friendsRequestCollection = new FriendRequestCollection(dateCreated:row.date_created,uuid:row.owner_uuid)
-		
+		println "--------------------------------------------------------------------"
+		FriendRequestCollection friendsRequestCollection = new FriendRequestCollection(id_:row.id,version_:row.version, dateCreated:row.date_created,ownerUuid:row.owner_uuid)
+
 		friendsRequestCollection.friendRequests= new HashSet<String>();
 		sql="select friend_request_collection_id , friend_requests_string from friend_request_collection_friend_requests where friend_request_collection_id="+row.id;
 		conn.eachRow(sql){row2 ->  friendsRequestCollection.friendRequests.add(row2.friend_requests_string); }
@@ -91,63 +92,56 @@ class LocalFriendService
 		// currentUser, and then insert an entry for newUser into currentUser's
 		// "confirmed friends" group and an entry for currentUser into newUser's
 		// "confirmed friends" group.
+		
 //		FriendCollection friendCollectionCU = FriendCollection.findByOwnerUuid( currentUser.uuid );
 //		FriendCollection friendCollectionNF = FriendCollection.findByOwnerUuid( newFriend.uuid );
-      FriendRequestCollection friendRequestsCU = FriendRequestCollection.findByOwnerUuid( currentUser.uuid );		
+//      FriendRequestCollection friendRequestsCU = FriendRequestCollection.findByOwnerUuid( currentUser.uuid );		
+		
 		FriendCollection friendCollectionCU = this.findFriendCollectionByOwnerUuid( currentUser.uuid );
 		FriendCollection friendCollectionNF = this.findFriendCollectionByOwnerUuid( newFriend.uuid );
-//		FriendRequestCollection friendRequestsCU = this.findFriendRequestCollectionByOwnerUuid( currentUser.uuid );
-		println "REMOOOOOOOOOOOOOOOOVE"
-		friendRequestsCU.removeFromFriendRequests( newFriend.uuid );
-		
-//
-//		
-//		
-//		select
-//		friendrequ0_.friend_request_collection_id as friend1_0_,
-//		friendrequ0_.friend_requests_string as friend2_0_
-//	from
-//		friend_request_collection_friend_requests friendrequ0_
-//	where
-//		friendrequ0_.friend_request_collection_id=?
-//
-//		
-//		
-//		update
-//		friend_request_collection
-//	set
-//		version=?,
-//		date_created=?,
-//		owner_uuid=?
-//	where
-//		id=?
-//		and version=?
-//--------------
-//
-//delete
-//from
-//	friend_request_collection_friend_requests
-//where
-//	friend_request_collection_id=?
+		FriendRequestCollection friendRequestsCU = this.findFriendRequestCollectionByOwnerUuid( currentUser.uuid );
 
+			
+		//friendRequestsCU.removeFromFriendRequests( newFriend.uuid );
 		
-		println "REMOOOOOOOOOOOOOOOOVE"
-		println "AAAAAADDD to FRIENDS"
-		friendCollectionCU.addToFriends( newFriend.uuid );
-		println "AAAAAADDD to FRIENDS"
-		println "AAAAAADDD to FRIENDS2"
-		friendCollectionNF.addToFriends( currentUser.uuid );
-		println "AAAAAADDD to FRIENDS2"
-		
-		println "SSAAAAAAAAAAAVE1"
-		friendRequestsCU.save(flush:true);
-		println "SSAAAAAAAAAAAVE2"
-		friendCollectionCU.save(flush:true);
-		println "SSAAAAAAAAAAAVE3"
-		friendCollectionNF.save(flush:true);
-		println "SSAAAAAAAAAAAVE-cabou"
-		
+		//remove all requests and insert the users
+		def conn = DirectConnectionManagerService.getConnection();
+		java.sql.Date now = new java.sql.Date(System.currentTimeMillis());
 
+		//update control tables
+		String sql = "update friend_collection \
+					set version="+(friendCollectionCU.version_+1) +", 	date_created='"+now+"', 	owner_uuid='"+friendCollectionCU.ownerUuid+"' \
+					where	id="+friendCollectionCU.id_+" and version="+friendCollectionCU.version_;
+		conn.execute(sql);
+		
+		sql = "update friend_collection \
+					set version="+(friendCollectionNF.version_+1) +", 	date_created='"+now+"', 	owner_uuid='"+friendCollectionNF.ownerUuid+"' \
+					where	id="+friendCollectionNF.id_+" and version="+friendCollectionNF.version_;
+		conn.execute(sql);
+
+		sql = "update	friend_request_collection	\
+		set	version="+(friendRequestsCU.version_+1)+",	date_created='"+now+"',	owner_uuid='"+friendRequestsCU.ownerUuid+"' \
+		where id="+friendRequestsCU.id_+" and version="+friendRequestsCU.version_;
+		conn.execute(sql);
+
+		//insert bidirectional links
+		sql = "insert	into friend_collection_friends (friend_collection_id, friends_string) values ("+friendCollectionCU.id_+",'"+friendCollectionNF.ownerUuid+"' )"
+		conn.execute(sql);
+		
+		sql = "insert	into friend_collection_friends (friend_collection_id, friends_string) values ("+friendCollectionNF.id_+",'"+friendCollectionCU.ownerUuid+"' )"
+		conn.execute(sql);
+
+		//remove pending request
+		sql ="delete from friend_request_collection_friend_requests \
+			 where friend_request_collection_id="+friendRequestsCU.id_+"	and friend_requests_string='"+newFriend.uuid+"'";
+		conn.execute(sql);
+	
+//		friendCollectionCU.addToFriends( newFriend.uuid );
+//		friendCollectionNF.addToFriends( currentUser.uuid );
+//		friendRequestsCU.save();
+//		friendCollectionCU.save();
+//		friendCollectionNF.save();
+		
 	}
 	
 	public void addToFriends( final User currentUser, final User newFriend )
