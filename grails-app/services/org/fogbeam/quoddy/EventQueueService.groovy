@@ -33,7 +33,15 @@ class EventQueueService
 			// BUT, for now, let's just implement it so that we only offer
 			// messages that were to the public stream.  We'll come back to deal with
 			// common group membership and other scenarios later.
-			def streamPublic = ShareTarget.findByName( ShareTarget.STREAM_PUBLIC);
+			
+			//def streamPublic = ShareTarget.findByName( ShareTarget.STREAM_PUBLIC);
+			String sql="select id, name, uuid from	share_target where name='"+ShareTarget.STREAM_PUBLIC+"'";
+			def conn = DirectConnectionManagerService.getConnection();
+			def row = conn.firstRow(sql);
+			ShareTarget streamPublic = new ShareTarget (name:row.name,uuid:row.uuid);
+			streamPublic.id=row.id;
+			
+			
 			
 			if( ! msg.targetUuid.equals( streamPublic.uuid ))
 			{
@@ -50,7 +58,8 @@ class EventQueueService
 				println "found User object for ${msgCreator.userId}";
 			}
 			
-			FriendCollection friendCollection = FriendCollection.findByOwnerUuid( msgCreator.uuid );
+			//FriendCollection friendCollection = FriendCollection.findByOwnerUuid( msgCreator.uuid );
+			FriendCollection friendCollection = LocalFriendService.findFriendCollectionByOwnerUuid( msgCreator.uuid );
 			if( friendCollection )
 			{
 				println "got a valid friends collection for ${msgCreator.userId}";

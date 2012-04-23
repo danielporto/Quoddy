@@ -10,7 +10,7 @@ class LocalFriendService
 	def directConnectionManagerService; 
 	
 	//added
-	public FriendCollection findFriendCollectionByOwnerUuid( final String uuid )
+	public static FriendCollection findFriendCollectionByOwnerUuid( final String uuid )
 	{
 		def conn = DirectConnectionManagerService.getConnection();
 		//String sql = "select id, version, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+uuid+"'";
@@ -26,7 +26,7 @@ class LocalFriendService
 	}
 
 	//added
-	public FriendRequestCollection findFriendRequestCollectionByOwnerUuid( final String uuid )
+	public static FriendRequestCollection findFriendRequestCollectionByOwnerUuid( final String uuid )
 	{
 		def conn = DirectConnectionManagerService.getConnection();
 		//String sql = "select id, version,  date_created, owner_uuid from	friend_request_collection where	owner_uuid='"+uuid+"'";
@@ -101,9 +101,9 @@ class LocalFriendService
 //		FriendCollection friendCollectionNF = FriendCollection.findByOwnerUuid( newFriend.uuid );
 //      FriendRequestCollection friendRequestsCU = FriendRequestCollection.findByOwnerUuid( currentUser.uuid );		
 		
-		FriendCollection friendCollectionCU = this.findFriendCollectionByOwnerUuid( currentUser.uuid );
-		FriendCollection friendCollectionNF = this.findFriendCollectionByOwnerUuid( newFriend.uuid );
-		FriendRequestCollection friendRequestsCU = this.findFriendRequestCollectionByOwnerUuid( currentUser.uuid );
+		FriendCollection friendCollectionCU = LocalFriendService.findFriendCollectionByOwnerUuid( currentUser.uuid );
+		FriendCollection friendCollectionNF = LocalFriendService.findFriendCollectionByOwnerUuid( newFriend.uuid );
+		FriendRequestCollection friendRequestsCU = LocalFriendService.findFriendRequestCollectionByOwnerUuid( currentUser.uuid );
 
 			
 		//friendRequestsCU.removeFromFriendRequests( newFriend.uuid );

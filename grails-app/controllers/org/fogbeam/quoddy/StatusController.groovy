@@ -145,14 +145,19 @@ class StatusController {
 			
 			String sql = "select id from uzer where user_id='"+session.user.userId+"'";
 			def row1 = conn.firstRow(sql);
-			sql = "select creator_id, id,version,creator_id,date_created,text from status_update where creator_id=" + row1.id;
+			//sql = "select creator_id, id,version,creator_id,date_created,text from status_update where creator_id=" + row1.id;
+			sql = "select creator_id, id,creator_id,date_created,text from status_update where creator_id=" + row1.id;
 			conn.eachRow(sql){row ->
-				updates.add(new StatusUpdate(text:row.text,creator:session.user,dateCreated:row.date_created));
+				StatusUpdate st = new StatusUpdate(text:row.text,creator:session.user);
+				st.id=row.id; 
+				st.dateCreated=row.date_created;
+				updates.add(st);
 			}
+			println "sorting the list"
 			if(updates.size>0)
-				updates = updates.sort(it.dateCreated).reverse();
+				updates = updates.sort{ it.dateCreated }.reverse();
 		}
-		
+		println "now is going to do something wird"
 		[updates:updates]
 	}
 	

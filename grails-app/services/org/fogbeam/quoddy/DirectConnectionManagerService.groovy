@@ -17,11 +17,47 @@ class DirectConnectionManagerService {
 			
 	}
 	static init(){
-		friendRequestCollectionFactory = new AtomicInteger(0);
-		friendCollectionFactory = new AtomicInteger(0);
-		iFollowCollectionFactory = new AtomicInteger(0);
-		statusUpdateFactory = new AtomicInteger(0);
-		eventBaseFactory = new AtomicInteger(0);
+		def conn = getConnection();
+		def row = conn.firstRow("select MAX(id) as maxid from friend_request_collection");
+		if(row.maxid==null){
+			friendRequestCollectionFactory = new AtomicInteger(0);
+		}else{
+			println "valor do rowid :"+(int)row.maxid;
+			friendRequestCollectionFactory = new AtomicInteger((int)row.maxid+1);
+		}
+		/////////////
+		row = conn.firstRow("select MAX(id) as maxid from friend_collection");
+		if(row.maxid==null){
+			friendCollectionFactory = new AtomicInteger(0);
+		}else{
+		println "valor do rowid :"+(int)row.maxid;
+		friendCollectionFactory = new AtomicInteger((int)row.maxid+1);
+		}
+		////
+		row = conn.firstRow("select MAX(id) as maxid from ifollow_collection");
+		if(row.maxid==null){
+			iFollowCollectionFactory = new AtomicInteger(0);
+		}else{
+		println "valor do rowid :"+(int)row.maxid;
+		iFollowCollectionFactory = new AtomicInteger((int)row.maxid+1);
+		}
+		///
+		row = conn.firstRow("select MAX(id) as maxid from status_update");
+		if(row.maxid==null){
+			statusUpdateFactory = new AtomicInteger(0);
+		}else{
+		println "valor do rowid :"+(int)row.maxid;
+			statusUpdateFactory  = new AtomicInteger((int)row.maxid+1);
+		}
+		/////
+		row = conn.firstRow("select MAX(id) as maxid from event_base");
+		if(row.maxid==null){
+			eventBaseFactory = new AtomicInteger(0);
+		}else{
+		println "valor do rowid :"+(int)row.maxid;
+			eventBaseFactory= new AtomicInteger((int)row.maxid+1);
+		}
+	
 	}
 	
 	
