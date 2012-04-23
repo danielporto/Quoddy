@@ -13,13 +13,14 @@ class LocalFriendService
 	public FriendCollection findFriendCollectionByOwnerUuid( final String uuid )
 	{
 		def conn = DirectConnectionManagerService.getConnection();
-		String sql = "select id, version, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+uuid+"'";
-		
+		//String sql = "select id, version, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+uuid+"'";
+		String sql = "select id, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+uuid+"'";
 		def row = conn.firstRow(sql);
-		FriendCollection friendsCollection = new FriendCollection(id_:row.id,version_:row.version, dateCreated:row.date_created,ownerUuid:row.owner_uuid);
+		FriendCollection friendsCollection = new FriendCollection(dateCreated:row.date_created,ownerUuid:row.owner_uuid);
+		friendsCollection.id=row.id;
 
 		friendsCollection.friends= new HashSet<String>();
-		sql="select friend_collection_id , friends_string from friend_collection_friends where friend_collection_id="+friendsCollection.id_;
+		sql="select friend_collection_id , friends_string from friend_collection_friends where friend_collection_id="+friendsCollection.id;
 		conn.eachRow(sql){row2 ->  friendsCollection.friends.add(row2.friends_string); }
 		return 	friendsCollection;
 	}
@@ -28,14 +29,14 @@ class LocalFriendService
 	public FriendRequestCollection findFriendRequestCollectionByOwnerUuid( final String uuid )
 	{
 		def conn = DirectConnectionManagerService.getConnection();
-		String sql = "select id, version,  date_created, owner_uuid from	friend_request_collection where	owner_uuid='"+uuid+"'";
+		//String sql = "select id, version,  date_created, owner_uuid from	friend_request_collection where	owner_uuid='"+uuid+"'";
+		String sql = "select id,  date_created, owner_uuid from	friend_request_collection where	owner_uuid='"+uuid+"'";
 
 		def row = conn.firstRow(sql)
-		println "--------------------------------------------------------------------"
-		FriendRequestCollection friendsRequestCollection = new FriendRequestCollection(id_:row.id,version_:row.version, dateCreated:row.date_created,ownerUuid:row.owner_uuid)
-
+		FriendRequestCollection friendsRequestCollection = new FriendRequestCollection(dateCreated:row.date_created,ownerUuid:row.owner_uuid)
+		friendsRequestCollection.id=row.id;
 		friendsRequestCollection.friendRequests= new HashSet<String>();
-		sql="select friend_request_collection_id , friend_requests_string from friend_request_collection_friend_requests where friend_request_collection_id="+row.id;
+		sql="select friend_request_collection_id , friend_requests_string from friend_request_collection_friend_requests where friend_request_collection_id="+friendsRequestCollection.id;
 		conn.eachRow(sql){row2 ->  friendsRequestCollection.friendRequests.add(row2.friend_requests_string); }
 		return 	friendsRequestCollection;
 	}
@@ -47,7 +48,8 @@ class LocalFriendService
 		def conn = DirectConnectionManagerService.getConnection();
 		//first get ifollow_collection_id
 		
-		String sql1= " select id,version,date_created,owner_uuid from ifollow_collection where owner_uuid='"+destinationUser.uuid+"'";
+		//String sql1= " select id,version,date_created,owner_uuid from ifollow_collection where owner_uuid='"+destinationUser.uuid+"'";
+		String sql1= " select id,date_created,owner_uuid from ifollow_collection where owner_uuid='"+destinationUser.uuid+"'";
 		def row1 = conn.firstRow(sql1);
 		if(row1.size()==0){
 			println("no user found");
@@ -56,6 +58,7 @@ class LocalFriendService
 			String sql2 = " select ifollow_collection_id, i_follow_string from" +
 						" ifollow_collection_i_follow where ifollow_collection_id="+row1.id;
 			iFollowCollection = new IFollowCollection(ownerUuid:row1.owner_uuid,dateCreated:row1.date_created);
+			iFollowCollection.id=row1.id;
 			iFollowCollection.iFollow = new HashSet<String>();
 			
 			conn.eachRow(sql2){row ->
@@ -72,7 +75,8 @@ class LocalFriendService
 		
 		//update iFollowCollection
 		
-		sql1= "update ifollow_collection set version="+(row1.version+1)+",date_created='"+row1.date_created+"',owner_uuid='"+destinationUser.uuid+"' where id="+row1.id+" and version="+row1.version;
+		//sql1= "update ifollow_collection set version="+(row1.version+1)+",date_created='"+row1.date_created+"',owner_uuid='"+destinationUser.uuid+"' where id="+row1.id+" and version="+row1.version;
+		sql1= "update ifollow_collection set date_created='"+row1.date_created+"',owner_uuid='"+destinationUser.uuid+"' where id="+row1.id;
 		conn.execute(sql1);
 		
 		sql1= "insert into ifollow_collection_i_follow (ifollow_collection_id, i_follow_string) values ("+row1.id+", '"+targetUser.uuid+"')";
@@ -109,31 +113,40 @@ class LocalFriendService
 		java.sql.Date now = new java.sql.Date(System.currentTimeMillis());
 
 		//update control tables
+//		String sql = "update friend_collection \
+//					set version="+(friendCollectionCU.version_+1) +", 	date_created='"+now+"', 	owner_uuid='"+friendCollectionCU.ownerUuid+"' \
+//					where	id="+friendCollectionCU.id_+" and version="+friendCollectionCU.version_;
 		String sql = "update friend_collection \
-					set version="+(friendCollectionCU.version_+1) +", 	date_created='"+now+"', 	owner_uuid='"+friendCollectionCU.ownerUuid+"' \
-					where	id="+friendCollectionCU.id_+" and version="+friendCollectionCU.version_;
+		set date_created='"+now+"', 	owner_uuid='"+friendCollectionCU.ownerUuid+"' \
+		where	id="+friendCollectionCU.id;
 		conn.execute(sql);
 		
+//		sql = "update friend_collection \
+//					set version="+(friendCollectionNF.version_+1) +", 	date_created='"+now+"', 	owner_uuid='"+friendCollectionNF.ownerUuid+"' \
+//					where	id="+friendCollectionNF.id_+" and version="+friendCollectionNF.version_;
 		sql = "update friend_collection \
-					set version="+(friendCollectionNF.version_+1) +", 	date_created='"+now+"', 	owner_uuid='"+friendCollectionNF.ownerUuid+"' \
-					where	id="+friendCollectionNF.id_+" and version="+friendCollectionNF.version_;
+		set date_created='"+now+"', 	owner_uuid='"+friendCollectionNF.ownerUuid+"' \
+		where	id="+friendCollectionNF.id;
 		conn.execute(sql);
 
+//		sql = "update	friend_request_collection	\
+//		set	version="+(friendRequestsCU.version_+1)+",	date_created='"+now+"',	owner_uuid='"+friendRequestsCU.ownerUuid+"' \
+//		where id="+friendRequestsCU.id_+" and version="+friendRequestsCU.version_;
 		sql = "update	friend_request_collection	\
-		set	version="+(friendRequestsCU.version_+1)+",	date_created='"+now+"',	owner_uuid='"+friendRequestsCU.ownerUuid+"' \
-		where id="+friendRequestsCU.id_+" and version="+friendRequestsCU.version_;
+		set	date_created='"+now+"',	owner_uuid='"+friendRequestsCU.ownerUuid+"' \
+		where id="+friendRequestsCU.id;
 		conn.execute(sql);
 
 		//insert bidirectional links
-		sql = "insert	into friend_collection_friends (friend_collection_id, friends_string) values ("+friendCollectionCU.id_+",'"+friendCollectionNF.ownerUuid+"' )"
+		sql = "insert	into friend_collection_friends (friend_collection_id, friends_string) values ("+friendCollectionCU.id+",'"+friendCollectionNF.ownerUuid+"' )"
 		conn.execute(sql);
 		
-		sql = "insert	into friend_collection_friends (friend_collection_id, friends_string) values ("+friendCollectionNF.id_+",'"+friendCollectionCU.ownerUuid+"' )"
+		sql = "insert	into friend_collection_friends (friend_collection_id, friends_string) values ("+friendCollectionNF.id+",'"+friendCollectionCU.ownerUuid+"' )"
 		conn.execute(sql);
 
 		//remove pending request
 		sql ="delete from friend_request_collection_friend_requests \
-			 where friend_request_collection_id="+friendRequestsCU.id_+"	and friend_requests_string='"+newFriend.uuid+"'";
+			 where friend_request_collection_id="+friendRequestsCU.id+"	and friend_requests_string='"+newFriend.uuid+"'";
 		conn.execute(sql);
 	
 //		friendCollectionCU.addToFriends( newFriend.uuid );
@@ -151,11 +164,13 @@ class LocalFriendService
 		//FriendRequestCollection friendRequests = FriendRequestCollection.findByOwnerUuid( newFriend.uuid );
 		FriendRequestCollection friendRequests = null;
 		def conn = DirectConnectionManagerService.getConnection();
-		String sql = "select id,version,date_created,owner_uuid from friend_request_collection where owner_uuid='"+newFriend.uuid+"'";
+		//String sql = "select id,version,date_created,owner_uuid from friend_request_collection where owner_uuid='"+newFriend.uuid+"'";
+		String sql = "select id,date_created,owner_uuid from friend_request_collection where owner_uuid='"+newFriend.uuid+"'";
 		
 		def row = conn.firstRow(sql)
 		
-		sql = "update friend_request_collection set version="+(row.version+1)+",date_created='"+row.date_created+"',owner_uuid='"+newFriend.uuid+"' where id="+row.id+" and version="+row.version;
+		//sql = "update friend_request_collection set version="+(row.version+1)+",date_created='"+row.date_created+"',owner_uuid='"+newFriend.uuid+"' where id="+row.id+" and version="+row.version;
+		sql = "update friend_request_collection set date_created='"+row.date_created+"',owner_uuid='"+newFriend.uuid+"' where id="+row.id;
 		conn.execute(sql);
 		
 		sql = "insert into friend_request_collection_friend_requests (friend_request_collection_id, friend_requests_string) values ("+row.id+", '"+currentUser.uuid+"')";
@@ -196,13 +211,18 @@ class LocalFriendService
 		// from Item item join item.labels lbls where 'hello' in (lbls)
 		def conn = DirectConnectionManagerService.getConnection();
 		
-		String sql = "select id,version,date_created,owner_uuid from ifollow_collection inner join ifollow_collection_i_follow ifollow1_ on id=ifollow1_.ifollow_collection_id"+ 
-				" where '"+user.uuid+"' in (ifollow1_.i_follow_string)";
+//		String sql = "select id,version,date_created,owner_uuid from ifollow_collection inner join ifollow_collection_i_follow ifollow1_ on id=ifollow1_.ifollow_collection_id"+ 
+//				" where '"+user.uuid+"' in (ifollow1_.i_follow_string)";
+		String sql = "select id,date_created,owner_uuid from ifollow_collection inner join ifollow_collection_i_follow ifollow1_ on id=ifollow1_.ifollow_collection_id"+
+		" where '"+user.uuid+"' in (ifollow1_.i_follow_string)";
 			
 	
 		List<IFollowCollection> iFollowCollections = new ArrayList<IFollowCollection>();
+		
 		conn.eachRow(sql){row ->
-			iFollowCollections.add(new IFollowCollection(ownerUuid:row.owner_uuid,dateCreated:row.date_created));
+			IFollowCollection ifc = new IFollowCollection(ownerUuid:row.owner_uuid,dateCreated:row.date_created);
+			ifc.id=row.id;
+			iFollowCollections.add(ifc);
 		}
 	
 //		List<IFollowCollection> iFollowCollections = 
@@ -230,19 +250,21 @@ class LocalFriendService
 		def conn = DirectConnectionManagerService.getConnection();
 		//first get ifollow_collection_id
 		
-		String sql1= " select id,version,date_created,owner_uuid from ifollow_collection where owner_uuid='"+user.uuid+"'";
+		//String sql1= " select id,version,date_created,owner_uuid from ifollow_collection where owner_uuid='"+user.uuid+"'";
+		String sql1= " select id,date_created,owner_uuid from ifollow_collection where owner_uuid='"+user.uuid+"'";
 		def row1 = conn.firstRow(sql1);
 		if(row1.size()==0){
 			println("no user found");
 			return peopleIFollow;
 		}
 		
-		String sql2 = " select ifollow_collection_id, i_follow_string from" +
-        			" ifollow_collection_i_follow where ifollow_collection_id="+row1.id;
-				
 		IFollowCollection iFollowCollection = null;
 		iFollowCollection = new IFollowCollection(ownerUuid:row1.owner_uuid,dateCreated:row1.date_created);
+		iFollowCollection.id=row1.id;
 		iFollowCollection.iFollow = new HashSet<String>();
+		
+		String sql2 = " select ifollow_collection_id, i_follow_string from" +
+		" ifollow_collection_i_follow where ifollow_collection_id="+iFollowCollection.id;
 		
 		conn.eachRow(sql2){row ->
 			iFollowCollection.iFollow.add(row.i_follow_string);

@@ -20,7 +20,9 @@ class UserService {
 	public User findUserByUserId( String userId )
 	{
 		def conn = DirectConnectionManagerService.getConnection();
-		String sql = "select id, version, current_status_id, date_created, email, first_name, full_name,\
+//		String sql = "select id, version, current_status_id, date_created, email, first_name, full_name,\
+//		last_name,	profile_id,	user_id, uuid from uzer where user_id='"+userId+"'";
+		String sql = "select id, current_status_id, date_created, email, first_name, full_name,\
 		last_name,	profile_id,	user_id, uuid from uzer where user_id='"+userId+"'";
 		def row = conn.firstRow(sql)
 		User user = null
@@ -28,8 +30,8 @@ class UserService {
 			println "no user found"
 		}else{
 		//User user = User.findByUserId( userId );
-			//user = new User(id:row.id,version:row.version,uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
 			 user = new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
+			 user.id=row.id;
 		}
 		
 		return user;
@@ -39,16 +41,19 @@ class UserService {
 	{
 		//User user = User.findByUuid( uuid );
 		def conn = DirectConnectionManagerService.getConnection();
-		String sql = "select id ,version,current_status_id, date_created, email, first_name, full_name, last_name, profile_id, user_id, "+
-		             "uuid from uzer where uuid='"+uuid+"'"
+//		String sql = "select id ,version,current_status_id, date_created, email, first_name, full_name, last_name, profile_id, user_id, "+
+//		             "uuid from uzer where uuid='"+uuid+"'"
+		String sql = "select id, current_status_id, date_created, email, first_name, full_name, last_name, profile_id, user_id, "+
+		"uuid from uzer where uuid='"+uuid+"'"
+
 		def row = conn.firstRow(sql)
 		User user = null
 		if(row.size()==0){
 			println "no user found"
 		}else{
 			//User user = User.findByUserId( userId );			 
-			user = new User(id:row.id,version:row.version,uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
-			//user = new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
+			user = new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
+			user.id = row.id;
 		}
 		
 		return user;

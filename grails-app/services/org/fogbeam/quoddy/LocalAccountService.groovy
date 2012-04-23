@@ -32,10 +32,13 @@ class LocalAccountService
 
 
 		FriendCollection friendCollection = new FriendCollection( ownerUuid: user.uuid );
+		friendCollection.id = DirectConnectionManagerService.getFriendCollectionIdAndIncrement();
 		friendCollection.save();
 		IFollowCollection iFollowCollection = new IFollowCollection( ownerUuid: user.uuid );
+		iFollowCollection.id = DirectConnectionManagerService.getiFollowCollectionFactory();
 		iFollowCollection.save();
-		FriendRequestCollection friendRequestCollection = new FriendRequestCollection( ownerUuid: user.uuid );
+		FriendRequestCollection friendRequestCollection = new FriendRequestCollection(ownerUuid: user.uuid );
+		friendRequestCollection.id=DirectConnectionManagerService.getFriendRequestCollectionIdAndIncrement();
 		friendRequestCollection.save();
 		
 	}

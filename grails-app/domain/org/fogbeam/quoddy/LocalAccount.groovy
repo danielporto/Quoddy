@@ -15,4 +15,5 @@ public class LocalAccount
 	String uuid;
 	String username;
 	String password;
+	
 }
