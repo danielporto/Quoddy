@@ -198,7 +198,6 @@ class ActivityStreamService {
 				  
 				sql = "select \
 					eventbase0_.id ,\
-					eventbase0_.version ,\
 					eventbase0_.date_created ,\
 					eventbase0_.effective_date ,\
 					eventbase0_.name ,\

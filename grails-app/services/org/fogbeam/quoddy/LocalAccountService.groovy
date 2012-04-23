@@ -15,6 +15,8 @@ class LocalAccountService
 		String sql = "select id, version, password , username , uuid from local_account where username='"+userId+"'";
 		def row = conn.firstRow(sql)
 		LocalAccount account = new LocalAccount(row.uuid,userId,row.password)
+		account.id=row.id;
+		account.version=row.version;
 		return account;
 	}
 	
@@ -35,7 +37,7 @@ class LocalAccountService
 		friendCollection.id = DirectConnectionManagerService.getFriendCollectionIdAndIncrement();
 		friendCollection.save();
 		IFollowCollection iFollowCollection = new IFollowCollection( ownerUuid: user.uuid );
-		iFollowCollection.id = DirectConnectionManagerService.getiFollowCollectionFactory();
+		iFollowCollection.id = DirectConnectionManagerService.getiFollowCollectionAndIncrement();
 		iFollowCollection.save();
 		FriendRequestCollection friendRequestCollection = new FriendRequestCollection(ownerUuid: user.uuid );
 		friendRequestCollection.id=DirectConnectionManagerService.getFriendRequestCollectionIdAndIncrement();

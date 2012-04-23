@@ -10,4 +10,5 @@ class StatusUpdate implements Serializable
 	Date dateCreated;
 	
 	static belongsTo = [User];
+	static mapping = { version false;  id generator: 'assigned'	 }
 }
