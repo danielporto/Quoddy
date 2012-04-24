@@ -1,6 +1,7 @@
 package org.fogbeam.quoddy
 
 import java.util.List
+import java.sql.*
 
 class UserGroupService
 {
@@ -72,16 +73,44 @@ class UserGroupService
 	}
 
 	// get all groups where the User is the Owner OR is a member
-	public List<UserGroup> getAllGroupsForUser( final User user )
+	public List<UserGroup> getAllGroupsForUser( final User user, Connection conn=null )
 	{
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		
-		List<UserGroup> tempGroups = UserGroup.executeQuery( "select ugroup from UserGroup as ugroup, User as user where user = ? and ( ugroup.owner = user OR user in elements (ugroup.groupMembers))", [user] );
-
-		if( tempGroups )
-		{
-			groups.addAll( tempGroups );
+		boolean needToCommit = false;
+		if(conn == null){
+			conn = DirectConnectionManagerService.getConnection();
+			needToCommit = true;
 		}
+		
+		String sql = "select user_group.id, user_group.version, user_group.date_created, user_group.description, user_group.name, user_group.owner_id, user_group.require_join_confirmation, user_group.uuid"+ 
+			" from user_group, uzer where uzer.id="+user.id+"  and (user_group.owner_id=uzer.id  or uzer.id in (" + 
+                "select user_id from  user_group_uzer  where user_group.id=user_group_uzer.user_group_group_members_id))";
+			
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		ResultSet rs = null;
+		try{
+			rs = stmt.executeQuery();
+			while(rs.next()){
+				groups.add(new UserGroup(name:rs.getString("name"),uuid:rs.getString("uuid"), description:rs.getString("description"), requireJoinConfirmation:rs.getBoolean("require_join_confirmation"),owner:user,dateCreated:rs.getDate("date_created")));
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		stmt.close();
+		rs.close();
+						
+		if(needToCommit){
+			conn.commit();
+			DirectConnectionManagerService.returnConnection(conn);
+		}
+		
+//		List<UserGroup> tempGroups = UserGroup.executeQuery( "select ugroup from UserGroup as ugroup, User as user where user = ? and ( ugroup.owner = user OR user in elements (ugroup.groupMembers))", [user] );
+//
+//		if( tempGroups )
+//		{
+//			groups.addAll( tempGroups );
+//		}
 		
 		
 		return groups;

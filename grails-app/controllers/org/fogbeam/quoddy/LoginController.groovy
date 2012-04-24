@@ -38,10 +38,9 @@ class LoginController {
 		// results to the browser (kinda ugly) or get a list of required
 		// credentials in advance, drive the user through any multi-step stuff
 		// then submit the credentials.
-		
+
 		user = loginService.doUserLogin( userId, password );
 
-				
 		if( user )
 		{
     		session.user = user;

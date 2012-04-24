@@ -4,20 +4,29 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException 
 import org.fogbeam.quoddy.ldap.LDAPPerson 
 import sun.misc.BASE64Encoder 
+import java.sql.*
 
 class LoginService 
 {
 	def userService;
 	def ldapPersonService;
 	def localAccountService;
+	def directConnectionManagerService;
 	
 	public User doUserLogin( final String userId, final String password )
 	{
 		User user = null;
+		//get a connection here
+		Connection conn = DirectConnectionManagerService.getConnection();
 		
 		// TODO: deal with authsource stuff, conver this stuff to use JAAS?
+		LocalAccount account = localAccountService.findAccountByUserId( userId, conn);
 		
-		LocalAccount account = localAccountService.findAccountByUserId( userId );
+//		def conn = DirectConnectionManagerService.getConnection();
+//		String sql = "select id, version, password , username , uuid from local_account where username='"+userId+"'";
+//		def row = conn.firstRow(sql)
+//		LocalAccount account = new LocalAccount(row.uuid,userId,row.password)
+		
 		boolean trySecondAuthSource = true;
 		if( account )
 		{
@@ -30,7 +39,7 @@ class LoginService
 				println "login successful";
 				
 				// now find a User that matches this account
-				user = userService.findUserByUserId( account.username );
+				user = userService.findUserByUserId( account.username, conn);
 				
 			}
 			else
@@ -66,6 +75,8 @@ class LoginService
 			}
 			
 		}
+		println "commit in the login ";
+		conn.commit();
 		
 		return user;	
 	}	

@@ -8,10 +8,11 @@ class BootStrap {
 
 	def ldapTemplate;
 	def userService;
-	
+	def directConnectionManagerService;
 	def init = { servletContext ->
      
-		
+		directConnectionManagerService.initDatabasePool();
+		directConnectionManagerService.init();
 		
 		 switch( Environment.current )
 	     {
