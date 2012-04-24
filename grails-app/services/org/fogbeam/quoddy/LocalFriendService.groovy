@@ -280,7 +280,7 @@ class LocalFriendService
 			rs = stmt.executeQuery();
 			if(rs.next()){
 				//sql = "update friend_request_collection set version="+(row.version+1)+",date_created='"+row.date_created+"',owner_uuid='"+newFriend.uuid+"' where id="+row.id+" and version="+row.version;
-				sql = "update friend_request_collection set date_created='"+rs.getString("date_created")+"',owner_uuid='"+newFriend.uuid+"' where id="+rs.getInt("id");
+				sql = "update friend_request_collection set date_created='"+rs.getDate("date_created")+"',owner_uuid='"+newFriend.uuid+"' where id="+rs.getInt("id");
 				PreparedStatement stmt1 = conn.prepareStatement(sql);
 				stmt1.executeUpdate();
 				stmt1.close();
