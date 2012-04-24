@@ -2,8 +2,10 @@ package org.fogbeam.quoddy;
 
 import java.util.Date;
 import java.util.List
+import java.sql.*
 
 import org.fogbeam.quoddy.profile.Profile
+import org.springframework.jdbc.core.RowCallbackHandler;
 
 class UserService {
 
@@ -17,9 +19,10 @@ class UserService {
 	// and again...  when finished, this will either be LdapPersonService or LocalAccountService, but we don't care.
 	def accountService;
 	
-	public User findUserByUserId( String userId )
+	public User findUserByUserId( String userId, Connection conn=null )
 	{
-		def conn = DirectConnectionManagerService.getConnection();
+		User user=null;
+		/*def conn = DirectConnectionManagerService.getConnection();
 //		String sql = "select id, version, current_status_id, date_created, email, first_name, full_name,\
 //		last_name,	profile_id,	user_id, uuid from uzer where user_id='"+userId+"'";
 		String sql = "select id, current_status_id, date_created, email, first_name, full_name,\
@@ -32,29 +35,69 @@ class UserService {
 		//User user = User.findByUserId( userId );
 			 user = new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
 			 user.id=row.id;
+		}*/
+		boolean needToCommit = false;
+		if(conn == null){
+			conn = DirectConnectionManagerService.getConnection();
+			needToCommit = true;
+		}else{
+			println "I already have a connection";
+		}
+		
+		String sql = "select id, current_status_id, date_created, email, first_name, full_name,\
+		last_name,	profile_id,	user_id, uuid from uzer where user_id='"+userId+"'";
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		ResultSet rs = null;
+		try{
+			rs = stmt.executeQuery();
+			if(rs.next()){
+				println "we found a user with userId " + userId;
+				user = new User(uuid:rs.getString("uuid"), userId:rs.getString("user_id"), dateCreated:rs.getDate("date_created"),firstName:rs.getString("first_name"),lastName:rs.getString("last_name"),email:rs.getString("email"));
+				user.id = (long)rs.getInt("id");
+				println "user id is : " + user.id;
+			}else{
+				println "sorry we didn't find a user with userId " + userId;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		stmt.close();
+		rs.close();
+		
+		if(needToCommit){
+			conn.commit();
+			DirectConnectionManagerService.returnConnection(conn);
 		}
 		
 		return user;
 	}	
 	
-	public User findUserByUuid( final String uuid )
+	public User findUserByUuid( final String uuid, Connection conn )
 	{
 		//User user = User.findByUuid( uuid );
-		def conn = DirectConnectionManagerService.getConnection();
 //		String sql = "select id ,version,current_status_id, date_created, email, first_name, full_name, last_name, profile_id, user_id, "+
 //		             "uuid from uzer where uuid='"+uuid+"'"
+		User user = null;
 		String sql = "select id, current_status_id, date_created, email, first_name, full_name, last_name, profile_id, user_id, "+
 		"uuid from uzer where uuid='"+uuid+"'"
 
-		def row = conn.firstRow(sql)
-		User user = null
-		if(row.size()==0){
-			println "no user found"
-		}else{
-			//User user = User.findByUserId( userId );			 
-			user = new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email)
-			user.id = row.id;
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		ResultSet rs = null;
+		try{
+			rs = stmt.executeQuery();
+			if(rs.next()){
+				println "we find a user with " + uuid;
+				user = new User(uuid:rs.getString("uuid"), userId:rs.getString("user_id"), dateCreated:rs.getDate("date_created"),firstName:rs.getString("first_name"),lastName:rs.getString("last_name"),email:rs.getString("email"));
+				user.id = (long)rs.getInt("id");
+			}else{
+				println "sorry we didn't find a user with userId " + uuid;
+				return user;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
 		}
+		stmt.close();
+		rs.close();
 		
 		return user;
 			
@@ -150,12 +193,22 @@ class UserService {
 	public List<User> findAllUsers() 
 	{
 		List<User> users = new ArrayList<User>();
-		def conn = DirectConnectionManagerService.getConnection();
+		Connection conn = DirectConnectionManagerService.getConnection();
 		String sql = "select id, version,current_status_id,date_created,email,first_name ,full_name ,last_name ,profile_id,user_id ,uuid  from uzer";
-		
-		conn.eachRow(sql){row ->
-			users.add(new User(uuid:row.uuid, userId:row.user_id, dateCreated:row.date_created,firstName:row.first_name,lastName:row.last_name,email:row.email));
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		ResultSet rs = null;
+		try{
+			rs = stmt.executeQuery();
+			while(rs.next()){
+				users.add(new User(uuid:rs.getString("uuid"), userId:rs.getString("user_id"), dateCreated:rs.getDate("date_created"),firstName:rs.getString("first_name"),lastName:rs.getString("last_name"),email:rs.getString("email")));
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
 		}
+		stmt.close();
+		rs.close();
+		conn.commit();
+		DirectConnectionManagerService.returnConnection(conn);
 //		List<User> temp = User.findAll();
 //		if( temp )
 //		{
@@ -167,13 +220,18 @@ class UserService {
 
 	public List<User> listFriends( User user ) 
 	{
+		//getConnection here
+		Connection conn = DirectConnectionManagerService.getConnection();
+		
 		List<User> friends = new ArrayList<User>();
-		List<User> temp = friendService.listFriends( user );
+		List<User> temp = friendService.listFriends( user, conn );
 		if( temp )
 		{
 			friends.addAll( temp );
 		}
 	
+		conn.commit();
+		DirectConnectionManagerService.returnConnection(conn);
 		return friends;	
 	}
 		// ---

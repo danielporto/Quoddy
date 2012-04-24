@@ -1,5 +1,5 @@
 package org.fogbeam.quoddy
-import groovy.sql.*
+import java.sql.*
 import java.util.concurrent.atomic.AtomicInteger
 
 class DirectConnectionManagerService {
@@ -11,72 +11,147 @@ class DirectConnectionManagerService {
 	static AtomicInteger statusUpdateFactory;
 	static AtomicInteger shareTargetFactory;
 	static AtomicInteger eventBaseFactory;
+	static String className = "com.mysql.jdbc.Driver";
+	static String connectionUrl = "jdbc:mysql://localhost:50000/quoddy2";
+	static String connectionUserName = "root";
+	static String connectionPassword = "101010";
+	static int maxConnPool = 100;
+	static Vector<Connection> availableConnPool = new Vector<Connection>();
+	static int delta = 1;
 	
-	static def getConnection(){
-		return Sql.newInstance("jdbc:mysql://localhost:53306/quoddy2","root","101010","com.mysql.jdbc.Driver")
+	static Connection createConnection(){
+		Connection con = null;
+		try{
+			Class.forName(className);
+			con = DriverManager.getConnection(connectionUrl,
+				connectionUserName, connectionPassword);
+			con.setAutoCommit(false);
+		}catch(ClassNotFoundException e){
+			e.printStackTrace();
+		}
+		return con;
 			
 	}
+	
+	static synchronized Connection getConnection(){
+		if(availableConnPool.size()>0){
+			return availableConnPool.pop();
+		}
+		return null;
+	}
+	
+	static synchronized void initDatabasePool(){
+		println "initialize database pool with number: "+maxConnPool;
+		int connectionNum = maxConnPool;
+		while(connectionNum > 0){
+			Connection conn = createConnection();
+			availableConnPool.push(conn);
+			connectionNum--;
+		}
+	}
+	
+	static synchronized void returnConnection(Connection conn){
+		availableConnPool.push(conn);
+	}
+	
 	static init(){
-		def conn = getConnection();
-		def row = conn.firstRow("select MAX(id) as maxid from friend_request_collection");
-		if(row.maxid==null){
-			friendRequestCollectionFactory = new AtomicInteger(0);
-		}else{
-			println "valor do rowid :"+(int)row.maxid;
-			friendRequestCollectionFactory = new AtomicInteger((int)row.maxid+1);
+		Connection conn = getConnection();
+		ResultSet rs = null;
+		Statement stmt = conn.createStatement();
+		int n ;
+		try{
+			rs = stmt.executeQuery("select MAX(id) as maxid from friend_request_collection");
+			if(rs.next()){
+				n = rs.getInt(1);
+			}else
+				n = 0;
+			friendRequestCollectionFactory = new AtomicInteger(n);
+			println "set friend request collection factory id: "+n;
+		}catch(SQLException e){
+			e.printStackTrace();
 		}
-		/////////////
-		row = conn.firstRow("select MAX(id) as maxid from friend_collection");
-		if(row.maxid==null){
-			friendCollectionFactory = new AtomicInteger(0);
-		}else{
-		println "valor do rowid :"+(int)row.maxid;
-		friendCollectionFactory = new AtomicInteger((int)row.maxid+1);
+		rs.close()
+		try{
+			rs = stmt.executeQuery("select MAX(id) as maxid from friend_collection");
+			if(rs.next()){
+				n=rs.getInt(1);
+			}else
+				n=0;
+			friendCollectionFactory = new AtomicInteger(n);
+			println "set friendCollectionFactory id: "+n;
+		}catch(SQLException e){
+			e.printStackTrace();
 		}
-		////
-		row = conn.firstRow("select MAX(id) as maxid from ifollow_collection");
-		if(row.maxid==null){
-			iFollowCollectionFactory = new AtomicInteger(0);
-		}else{
-		println "valor do rowid :"+(int)row.maxid;
-		iFollowCollectionFactory = new AtomicInteger((int)row.maxid+1);
+		rs.close();
+		
+		try{
+			rs = stmt.executeQuery("select MAX(id) as maxid from ifollow_collection");
+			if(rs.next()){
+				n = rs.getInt(1);
+			}else
+				n = 0;
+			iFollowCollectionFactory = new AtomicInteger(n);
+			println "set iFollowCollectionFactory id: " + n;
+			
+		}catch(SQLException e){
+			e.printStackTrace();
 		}
-		///
-		row = conn.firstRow("select MAX(id) as maxid from status_update");
-		if(row.maxid==null){
-			statusUpdateFactory = new AtomicInteger(0);
-		}else{
-		println "valor do rowid :"+(int)row.maxid;
-			statusUpdateFactory  = new AtomicInteger((int)row.maxid+1);
+		
+		rs.close();
+
+		
+		try{
+			rs = stmt.executeQuery("select MAX(id) as maxid from status_update");
+			if(rs.next()){
+				n = rs.getInt(1);
+			}else
+				n = 0;
+			statusUpdateFactory = new AtomicInteger(n);
+			println "set statusUpdateFactory id: " + n;
+			
+		}catch(SQLException e){
+			e.printStackTrace();
 		}
-		/////
-		row = conn.firstRow("select MAX(id) as maxid from event_base");
-		if(row.maxid==null){
-			eventBaseFactory = new AtomicInteger(0);
-		}else{
-		println "valor do rowid :"+(int)row.maxid;
-			eventBaseFactory= new AtomicInteger((int)row.maxid+1);
+		
+		rs.close();
+		
+		try{
+			rs = stmt.executeQuery("select MAX(id) as maxid from event_base");
+			if(rs.next()){
+				n = rs.getInt(1);
+			}else
+				n = 0;
+			eventBaseFactory = new AtomicInteger(n);
+			println "set eventBaseFactory id: " + n;
+			
+		}catch(SQLException e){
+			e.printStackTrace();
 		}
+		
+		rs.close();
+		stmt.close();
+		conn.commit();
+		returnConnection(conn);
 	
 	}
 	
 	
 	static int getFriendRequestCollectionIdAndIncrement(){
-		return friendRequestCollectionFactory.getAndIncrement();
+		return friendRequestCollectionFactory.addAndGet(delta);
 	}
 	static int getFriendCollectionIdAndIncrement(){
-		return friendCollectionFactory.getAndIncrement();
+		return friendCollectionFactory.addAndGet(delta);
 	}
 	static int getiFollowCollectionAndIncrement(){
-		return iFollowCollectionFactory.getAndIncrement();
+		return iFollowCollectionFactory.addAndGet(delta);
 	}
 	static int getStatusUpdateAndIncrement(){
-		return statusUpdateFactory.getAndIncrement();
+		return statusUpdateFactory.addAndGet(delta);
 	}
 	static int getShareTargetIdAndIncrement(){
-		return shareTargetFactory.getAndIncrement();
+		return shareTargetFactory.addAndGet(delta);
 	}
 	static int getEventBaseIdAndIncrement(){
-		return eventBaseFactory.getAndIncrement();	
+		return eventBaseFactory.addAndGet(delta);	
 	}
 }

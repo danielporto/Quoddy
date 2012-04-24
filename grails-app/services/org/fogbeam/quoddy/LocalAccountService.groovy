@@ -2,21 +2,35 @@ package org.fogbeam.quoddy
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.*
 import java.util.List;
 
 import sun.misc.BASE64Encoder;
 
 class LocalAccountService 
 {
-	public LocalAccount findAccountByUserId( final String userId )
+	public LocalAccount findAccountByUserId( final String userId, Connection conn)
 	{
 		//LocalAccount account = LocalAccount.findByUsername( userId );
-		def conn = DirectConnectionManagerService.getConnection();
+		LocalAccount account = null;
 		String sql = "select id, version, password , username , uuid from local_account where username='"+userId+"'";
-		def row = conn.firstRow(sql)
-		LocalAccount account = new LocalAccount(row.uuid,userId,row.password)
-		account.id=row.id;
-		account.version=row.version;
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		ResultSet rs = null;
+		try{
+			rs = stmt.executeQuery();
+			if(rs.next()){
+				println "we found a local account with userId: " + userId
+				account = new LocalAccount(rs.getString("uuid"),userId,rs.getString("password"));
+				account.id=rs.getInt("id");
+				account.version=rs.getInt("version");
+			}else{
+				println "sorry we didn't find a local account with userId " + userId;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		stmt.close();
+		rs.close();
 		return account;
 	}
 	

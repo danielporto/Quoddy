@@ -1,5 +1,6 @@
 package org.fogbeam.quoddy;
 import java.util.Date;
+import java.sql.*;
 
 
 
@@ -114,6 +115,7 @@ class ActivityStreamService {
 		// to build up this list above, and never bother storing the JMS Message instances
 		// at all...  but for now, just to get something so we can prototype the
 		// behavior up through the UI...
+		Connection conn1 = DirectConnectionManagerService.getConnection();
 		for( int i = 0; i < messages.size(); i++ )
 		{
 			Map msg = messages.get(i);
@@ -121,12 +123,14 @@ class ActivityStreamService {
 			Activity activity = new Activity();
 			
 			// println "msg class: " + msg?.getClass().getName();
-			activity.owner = userService.findUserByUserId( msg.creator ); 
+			activity.owner = userService.findUserByUserId( msg.creator, conn1 ); 
 			activity.content = msg.text;
 			activity.dateCreated = new Date( msg.originTime );
 			recentActivities.add( activity );	
 		}
-		
+		if(messages.size()>0)
+			conn1.commit();
+		DirectConnectionManagerService.returnConnection(conn1);
 		println "recentActivities.size() = ${recentActivities.size()}"
 		
 		/* NOTE: here, we need to make sure we don't retrieve anything NEWER than the OLDEST
@@ -183,10 +187,21 @@ class ActivityStreamService {
 				friendIds.add( user.id );
 
 				//ShareTarget streamPublic = ShareTarget.findByName( ShareTarget.STREAM_PUBLIC );
-				def conn = DirectConnectionManagerService.getConnection();
+				Connection conn = DirectConnectionManagerService.getConnection();
 				String sql = "select	id , version,	name, uuid from share_target where	name='"+ShareTarget.STREAM_PUBLIC +"'"; 
-				def row = conn.firstRow(sql)
-				ShareTarget streamPublic = new ShareTarget(id:row.id,version:row.version,name:row.name,uuid:row.uuid);
+				PreparedStatement stmt = conn.prepareStatement(sql);
+				ResultSet rs = null;
+				ShareTarget streamPublic = null;
+				try{
+					rs = stmt.executeQuery();
+					if(rs.next()){
+						streamPublic = new ShareTarget(id:rs.getInt("id"),version:rs.getInt("version"),name:rs.getString("name"),uuid:rs.getString("uuid"));
+					}
+				}catch(SQLException e){
+					e.printStackTrace();
+				}
+				stmt.close();
+				rs.close();
 				
 //				List<EventBase> queryResults = 
 //					EventBase.executeQuery( "select event from EventBase as event where event.effectiveDate >= :cutoffDate and event.owner.id in (:friendIds) and event.effectiveDate < :oldestOriginTime and event.targetUuid = :targetUuid order by event.effectiveDate desc",
@@ -260,14 +275,24 @@ class ActivityStreamService {
 					where	eventbase0_.effective_date>='"+cutoffDate+"'	and (	eventbase0_.owner_id in (	"+sb.toString()+"		)	)	and eventbase0_.effective_date<'"+new Date( oldestOriginTime)+"' and eventbase0_.target_uuid='"+streamPublic.uuid+"' \
 					order by eventbase0_.effective_date desc limit "+ recordsToRetrieve;
 
+					stmt = conn.prepareStatement(sql);
+					try{
+						rs = stmt.executeQuery();
+						List<EventBase> queryResults= new ArrayList<EventBase>();
+						while(rs.next()){
+							queryResults.add(new EventBase(owner:rs.getInt("eventbase0_.owner_id"), dateCreated:rs.getDate("eventbase0_.date_created"), effectiveDate:rs.getDate("eventbase0_.effective_date"), name:rs.getString("eventbase0_.name"), targetUuid:rs.getString("eventbase0_.target_uuid")));
+							}
+						println "adding ${queryResults.size()} activities read from DB";
+						recentActivities.addAll( queryResults );
+					}catch(SQLException e){
+						e.printStackTrace();
+					}
+					stmt.close();
+					rs.close();
+					//println " query "+ sql;		
+					conn.commit();
+					DirectConnectionManagerService.returnConnection(conn);
 					
-					//println " query "+ sql;					
-					List<EventBase> queryResults= new ArrayList<EventBase>();
-					conn.eachRow(sql){row2 ->
-						queryResults.add(new EventBase(owner:row2.eventbase0_.owner_id, dateCreated:row2.eventbase0_.date_created, effectiveDate:row2.eventbase0_.effective_date, name:row2.eventbase0_.name, targetUuid:row2.eventbase0_.target_uuid))};
-								
-					println "adding ${queryResults.size()} activities read from DB";
-					recentActivities.addAll( queryResults );
 			}
 			else
 			{

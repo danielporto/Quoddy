@@ -11,6 +11,7 @@ class BootStrap {
 	def directConnectionManagerService;
 	def init = { servletContext ->
      
+		directConnectionManagerService.initDatabasePool();
 		directConnectionManagerService.init();
 		
 		 switch( Environment.current )
