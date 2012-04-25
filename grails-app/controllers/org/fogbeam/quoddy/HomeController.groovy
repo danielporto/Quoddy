@@ -1,4 +1,5 @@
 package org.fogbeam.quoddy
+import java.sql.*
 
 class HomeController {
 
@@ -17,7 +18,6 @@ class HomeController {
 		def userDefinedStreams = new ArrayList<UserStream>(); 
 		def userLists = new ArrayList<UserList>();
 		def userGroups = new ArrayList<UserGroup>();
-
 		if( userId != null )
     	{
 			println "getting User by userId: ${userId}";

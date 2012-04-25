@@ -1,20 +1,38 @@
 package org.fogbeam.quoddy
 
 import java.util.Date;
+import java.sql.*
 import java.util.List;
 
 class UserListService
 {
-	public List<UserList> getListsForUser( final User user )
+	public List<UserList> getListsForUser( final User user, Connection conn=null )
 	{
 		List<UserList> lists = new ArrayList<UserList>();
-		
-		def conn = DirectConnectionManagerService.getConnection();
+		boolean needToCommit = false;
+		if(conn == null){
+			conn = DirectConnectionManagerService.getConnection();
+			needToCommit = true;
+		}
 		
 		String sql = "select id ,version,date_created, description, name,owner_id, uuid\
 				from user_list  where owner_id="+user.id;
-		conn.eachRow(sql){row ->
-			lists.add(new UserList(name:row.name,uuid:row.uuid, description:row.description, owner:user,dateCreated:row.date_created));
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		ResultSet rs = null;
+		try{
+			rs = stmt.executeQuery();
+			while(rs.next()){
+				lists.add(new UserList(name:rs.getString("name"),uuid:rs.getString("uuid"), description:rs.getString("description"), owner:user,dateCreated:rs.getDate("date_created")));
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		stmt.close();
+		rs.close();
+				
+		if(needToCommit){
+			conn.commit();
+			DirectConnectionManagerService.returnConnection(conn);
 		}
 //		List<UserList> tempLists = UserList.executeQuery( "select list from UserList as list where list.owner = :owner",
 //														  ['owner':user] );

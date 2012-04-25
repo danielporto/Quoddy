@@ -1,6 +1,7 @@
 package org.fogbeam.quoddy
 
 import java.util.Set
+import java.sql.*
 
 class EventQueueService 
 {	
@@ -19,6 +20,10 @@ class EventQueueService
 		// all the appropriate queues
 		Set<Map.Entry<String, Deque<Map>>> entries = eventQueues.entrySet();
 		println "got entrySet from eventQueues object: ${entries}";
+		Connection conn = null;
+		if(entries.size()>0){
+			conn = DirectConnectionManagerService.getConnection();
+		}
 		for( Map.Entry<String, Deque<Map>> entry : entries )
 		{
 			println "entry: ${entry}";
@@ -36,15 +41,27 @@ class EventQueueService
 			
 			//def streamPublic = ShareTarget.findByName( ShareTarget.STREAM_PUBLIC);
 			String sql="select id, name, uuid from	share_target where name='"+ShareTarget.STREAM_PUBLIC+"'";
-			def conn = DirectConnectionManagerService.getConnection();
-			def row = conn.firstRow(sql);
-			ShareTarget streamPublic = new ShareTarget (name:row.name,uuid:row.uuid);
-			streamPublic.id=row.id;
-			
-			
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			ResultSet rs = null;
+			ShareTarget streamPublic = null;
+			try{
+				rs = stmt.executeQuery();
+				if(rs.next()){
+					streamPublic = new ShareTarget (name:rs.getString("name"),uuid:rs.getString("uuid"));
+					streamPublic.id=rs.getInt("id");
+				}else{
+					println "sorry we didn't find a user with userId " + userId;
+				}
+			}catch(SQLException e){
+				e.printStackTrace();
+			}
+			stmt.close();
+			rs.close();			
 			
 			if( ! msg.targetUuid.equals( streamPublic.uuid ))
 			{
+				conn.commit();
+				DirectConnectionManagerService.returnConnection(conn);
 				return;
 			}
 			
@@ -52,14 +69,14 @@ class EventQueueService
 			// TODO: don't offer message unless the owner of this queue
 			// and the event creator, are friends (or the owner *is* the creator)
 			println "msg creator: ${msg.creator}";
-			User msgCreator = userService.findUserByUserId( msg.creator );
+			User msgCreator = userService.findUserByUserId( msg.creator, conn);
 			if( msgCreator )
 			{
 				println "found User object for ${msgCreator.userId}";
 			}
 			
 			//FriendCollection friendCollection = FriendCollection.findByOwnerUuid( msgCreator.uuid );
-			FriendCollection friendCollection = LocalFriendService.findFriendCollectionByOwnerUuid( msgCreator.uuid );
+			FriendCollection friendCollection = LocalFriendService.findFriendCollectionByOwnerUuid( msgCreator.uuid, conn );
 			if( friendCollection )
 			{
 				println "got a valid friends collection for ${msgCreator.userId}";
@@ -74,7 +91,7 @@ class EventQueueService
 					println "friend: ${friend}";
 				}
 			}
-			User targetUser = userService.findUserByUserId( key );
+			User targetUser = userService.findUserByUserId( key, conn );
 			if( friends.contains( targetUser.uuid ) || msgCreator.uuid.equals( targetUser.uuid ) )
 			{
 				println "match found, offering message";
@@ -94,6 +111,10 @@ class EventQueueService
 			
 			
 			
+		}
+		if(conn != null){
+			conn.commit();
+			DirectConnectionManagerService.returnConnection(conn);
 		}
 		println "done processing eventQueue instances";
 	}
