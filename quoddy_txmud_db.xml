@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<databases dbNum='1'>
+	<database dcId='0' dbId='0' dbHost='thor05.mpi-sws.org' dbPort='50000' dbUser='root' dbPwd='101010' 
+	dbName='quoddy2'   tableList='activity,calendar_event,calendar_feed,contact_address,educational_experience,event_base,event_subscription,favorite,friend_collection,friend_collection_friends,friend_request_collection,friend_request_collection_friend_requests,historical_employer,ifollow_collection,ifollow_collection_i_follow,interest,language,local_account,organization_association,photograph,profile,profile_contact_address,profile_educational_experience,profile_favorite,profile_historical_employer,profile_interest,profile_language,profile_links,profile_organization_association,profile_skill,project,recommendation,share_target,skill,status_update,system_settings,user_group,user_group_uzer,user_list,user_list_uzer,user_stream,uzer'    
+	tableLWW=''         
+	talbeOps=''             
+	redTable='activity,calendar_event,calendar_feed,contact_address,educational_experience,event_base,event_subscription,favorite,friend_collection,friend_collection_friends,friend_request_collection,friend_request_collection_friend_requests,historical_employer,ifollow_collection,ifollow_collection_i_follow,interest,language,local_account,organization_association,photograph,profile,profile_contact_address,profile_educational_experience,profile_favorite,profile_historical_employer,profile_interest,profile_language,profile_links,profile_organization_association,profile_skill,project,recommendation,share_target,skill,status_update,system_settings,user_group,user_group_uzer,user_list,user_list_uzer,user_stream,uzer' 
+	blueTable='' url_prefix='jdbc:mysql://' > 
+	</database>
+</databases>
