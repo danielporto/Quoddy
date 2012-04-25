@@ -14,4 +14,5 @@ class ShareTarget
 	
 	String name;
 	String uuid;
+	//static mapping = { version false;  id generator: 'assigned'	 }
 }

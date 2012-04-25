@@ -8,5 +8,5 @@ public class IFollowCollection
 	Set<String> iFollow;
 	
 	static hasMany = [iFollow:String];
-	
+	static mapping = { version false;  id generator: 'assigned'	 }
 }

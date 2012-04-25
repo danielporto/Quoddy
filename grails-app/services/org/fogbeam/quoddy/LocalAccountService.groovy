@@ -2,16 +2,35 @@ package org.fogbeam.quoddy
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.*
 import java.util.List;
 
 import sun.misc.BASE64Encoder;
 
 class LocalAccountService 
 {
-	public LocalAccount findAccountByUserId( final String userId )
+	public LocalAccount findAccountByUserId( final String userId, Connection conn)
 	{
-		LocalAccount account = LocalAccount.findByUsername( userId );
-		
+		//LocalAccount account = LocalAccount.findByUsername( userId );
+		LocalAccount account = null;
+		String sql = "select id, version, password , username , uuid from local_account where username='"+userId+"'";
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		ResultSet rs = null;
+		try{
+			rs = stmt.executeQuery();
+			if(rs.next()){
+				println "we found a local account with userId: " + userId
+				account = new LocalAccount(rs.getString("uuid"),userId,rs.getString("password"));
+				account.id=rs.getInt("id");
+				account.version=rs.getInt("version");
+			}else{
+				println "sorry we didn't find a local account with userId " + userId;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		stmt.close();
+		rs.close();
 		return account;
 	}
 	
@@ -29,10 +48,13 @@ class LocalAccountService
 
 
 		FriendCollection friendCollection = new FriendCollection( ownerUuid: user.uuid );
+		friendCollection.id = DirectConnectionManagerService.getFriendCollectionIdAndIncrement();
 		friendCollection.save();
 		IFollowCollection iFollowCollection = new IFollowCollection( ownerUuid: user.uuid );
+		iFollowCollection.id = DirectConnectionManagerService.getiFollowCollectionAndIncrement();
 		iFollowCollection.save();
-		FriendRequestCollection friendRequestCollection = new FriendRequestCollection( ownerUuid: user.uuid );
+		FriendRequestCollection friendRequestCollection = new FriendRequestCollection(ownerUuid: user.uuid );
+		friendRequestCollection.id=DirectConnectionManagerService.getFriendRequestCollectionIdAndIncrement();
 		friendRequestCollection.save();
 		
 	}

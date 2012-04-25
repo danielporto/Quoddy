@@ -22,7 +22,7 @@ class User implements Serializable
 		dateCreated()
     }
 
-    String uuid;
+	String uuid;
     String userId;
     Date dateCreated;
     Profile profile;
@@ -39,6 +39,7 @@ class User implements Serializable
 	String bio;
 	String email;
 	static transients = [ "password", "homepage", "displayName", "bio",  ]
+	//static mapping = { version false;  id generator: 'assigned'	 }
 	
 	
     static mapping = {

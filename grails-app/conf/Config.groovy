@@ -104,6 +104,9 @@ log4j = {
     //}
 
 	// debug  
+	trace 'org.hibernate.type'
+	//debug 'org.hibernate.SQL'
+
 	
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
 	       'org.codehaus.groovy.grails.web.pages', //  GSP

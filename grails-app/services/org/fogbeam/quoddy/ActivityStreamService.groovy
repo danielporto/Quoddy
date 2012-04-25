@@ -1,4 +1,8 @@
 package org.fogbeam.quoddy;
+import java.util.Date;
+import java.sql.*;
+
+
 
 import java.util.Calendar
 
@@ -111,6 +115,7 @@ class ActivityStreamService {
 		// to build up this list above, and never bother storing the JMS Message instances
 		// at all...  but for now, just to get something so we can prototype the
 		// behavior up through the UI...
+		Connection conn1 = DirectConnectionManagerService.getConnection();
 		for( int i = 0; i < messages.size(); i++ )
 		{
 			Map msg = messages.get(i);
@@ -118,12 +123,14 @@ class ActivityStreamService {
 			Activity activity = new Activity();
 			
 			// println "msg class: " + msg?.getClass().getName();
-			activity.owner = userService.findUserByUserId( msg.creator ); 
+			activity.owner = userService.findUserByUserId( msg.creator, conn1 ); 
 			activity.content = msg.text;
 			activity.dateCreated = new Date( msg.originTime );
 			recentActivities.add( activity );	
 		}
-		
+		if(messages.size()>0)
+			conn1.commit();
+		DirectConnectionManagerService.returnConnection(conn1);
 		println "recentActivities.size() = ${recentActivities.size()}"
 		
 		/* NOTE: here, we need to make sure we don't retrieve anything NEWER than the OLDEST
@@ -152,6 +159,8 @@ class ActivityStreamService {
 			println "Using ${new Date(oldestOriginTime)} as oldestOriginTime";
 						
 			List<User> friends = userService.listFriends( user );
+			StringBuilder sb = new StringBuilder(); 
+			boolean friends_added = false; 
 			if( friends != null && friends.size() >= 0 ) 
 			{
 				println "Found ${friends.size()} friends";
@@ -161,24 +170,129 @@ class ActivityStreamService {
 					def id = friend.id;
 					println( "Adding friend id: ${id}, userId: ${friend.userId} to list" );
 					friendIds.add( id );
+					
+					sb.append(id);
+					sb.append(",");
+					friends_added=true;
 				}
+				if(friends_added)
+					sb.deleteCharAt(sb.length()-1);
+				else
+					sb.append("null");
 			
 				
 				// for the purpose of this query, treat a user as their own friend... that is, we
 				// will want to read Activities created by this user (we see out own updates in our
 				// own feed)
 				friendIds.add( user.id );
-				ShareTarget streamPublic = ShareTarget.findByName( ShareTarget.STREAM_PUBLIC );
-				List<EventBase> queryResults = 
-					EventBase.executeQuery( "select event from EventBase as event where event.effectiveDate >= :cutoffDate and event.owner.id in (:friendIds) and event.effectiveDate < :oldestOriginTime and event.targetUuid = :targetUuid order by event.effectiveDate desc",
-						['cutoffDate':cutoffDate, 
-						 'oldestOriginTime':new Date(oldestOriginTime), 
-						 'friendIds':friendIds, 
-						 'targetUuid':streamPublic.uuid], 
-					    ['max': recordsToRetrieve ]);
-			
-					println "adding ${queryResults.size()} activities read from DB";
-					recentActivities.addAll( queryResults );
+
+				//ShareTarget streamPublic = ShareTarget.findByName( ShareTarget.STREAM_PUBLIC );
+				Connection conn = DirectConnectionManagerService.getConnection();
+				String sql = "select	id , version,	name, uuid from share_target where	name='"+ShareTarget.STREAM_PUBLIC +"'"; 
+				PreparedStatement stmt = conn.prepareStatement(sql);
+				ResultSet rs = null;
+				ShareTarget streamPublic = null;
+				try{
+					rs = stmt.executeQuery();
+					if(rs.next()){
+						streamPublic = new ShareTarget(id:rs.getInt("id"),version:rs.getInt("version"),name:rs.getString("name"),uuid:rs.getString("uuid"));
+					}
+				}catch(SQLException e){
+					e.printStackTrace();
+				}
+				stmt.close();
+				rs.close();
+				
+//				List<EventBase> queryResults = 
+//					EventBase.executeQuery( "select event from EventBase as event where event.effectiveDate >= :cutoffDate and event.owner.id in (:friendIds) and event.effectiveDate < :oldestOriginTime and event.targetUuid = :targetUuid order by event.effectiveDate desc",
+//						['cutoffDate':cutoffDate, 
+//						 'oldestOriginTime':new Date(oldestOriginTime), 
+//						 'friendIds':friendIds, 
+//						 'targetUuid':streamPublic.uuid], 
+//					    ['max': recordsToRetrieve ]);
+				  
+				sql = "select \
+					eventbase0_.id ,\
+					eventbase0_.date_created ,\
+					eventbase0_.effective_date ,\
+					eventbase0_.name ,\
+					eventbase0_.owner_id ,\
+					eventbase0_.target_uuid ,\
+					eventbase0_1_.actor_content ,\
+					eventbase0_1_.actor_display_name ,\
+					eventbase0_1_.actor_image_height ,\
+					eventbase0_1_.actor_image_url ,\
+					eventbase0_1_.actor_image_width ,\
+					eventbase0_1_.actor_object_type ,\
+					eventbase0_1_.actor_url ,\
+					eventbase0_1_.actor_uuid ,\
+					eventbase0_1_.content ,\
+					eventbase0_1_.generator_url ,\
+					eventbase0_1_.icon ,\
+					eventbase0_1_.object_content ,\
+					eventbase0_1_.object_display_name ,\
+					eventbase0_1_.object_image_height ,\
+					eventbase0_1_.object_image_url ,\
+					eventbase0_1_.object_image_width ,\
+					eventbase0_1_.object_object_type ,\
+					eventbase0_1_.object_url ,\
+					eventbase0_1_.object_uuid ,\
+					eventbase0_1_.provider_url ,\
+					eventbase0_1_.published ,\
+					eventbase0_1_.target_content ,\
+					eventbase0_1_.target_display_name ,\
+					eventbase0_1_.target_image_height ,\
+					eventbase0_1_.target_image_url ,\
+					eventbase0_1_.target_image_width ,\
+					eventbase0_1_.target_object_type ,\
+					eventbase0_1_.target_url ,\
+					eventbase0_1_.title ,\
+					eventbase0_1_.updated ,\
+					eventbase0_1_.url ,\
+					eventbase0_1_.uuid ,\
+					eventbase0_1_.verb ,\
+					eventbase0_2_.date_event_created ,\
+					eventbase0_2_.description ,\
+					eventbase0_2_.end_date ,\
+					eventbase0_2_.geo_lat ,\
+					eventbase0_2_.geo_long ,\
+					eventbase0_2_.last_modified ,\
+					eventbase0_2_.location ,\
+					eventbase0_2_.start_date ,\
+					eventbase0_2_.status ,\
+					eventbase0_2_.summary ,\
+					eventbase0_2_.uid ,\
+					eventbase0_2_.url ,\
+					eventbase0_2_.uuid ,\
+					case\
+						when eventbase0_1_.id is not null then 1\
+						when eventbase0_2_.id is not null then 2\
+						when eventbase0_.id is not null then 0\
+					end as clazz_\
+					from event_base eventbase0_"+
+					" left outer join 	activity eventbase0_1_	on eventbase0_.id=eventbase0_1_.id "+ 
+					" left outer join	calendar_event eventbase0_2_ on eventbase0_.id=eventbase0_2_.id \
+					where	eventbase0_.effective_date>='"+cutoffDate+"'	and (	eventbase0_.owner_id in (	"+sb.toString()+"		)	)	and eventbase0_.effective_date<'"+new Date( oldestOriginTime)+"' and eventbase0_.target_uuid='"+streamPublic.uuid+"' \
+					order by eventbase0_.effective_date desc limit "+ recordsToRetrieve;
+
+					stmt = conn.prepareStatement(sql);
+					try{
+						rs = stmt.executeQuery();
+						List<EventBase> queryResults= new ArrayList<EventBase>();
+						while(rs.next()){
+							queryResults.add(new EventBase(owner:rs.getInt("eventbase0_.owner_id"), dateCreated:rs.getDate("eventbase0_.date_created"), effectiveDate:rs.getDate("eventbase0_.effective_date"), name:rs.getString("eventbase0_.name"), targetUuid:rs.getString("eventbase0_.target_uuid")));
+							}
+						println "adding ${queryResults.size()} activities read from DB";
+						recentActivities.addAll( queryResults );
+					}catch(SQLException e){
+						e.printStackTrace();
+					}
+					stmt.close();
+					rs.close();
+					//println " query "+ sql;		
+					conn.commit();
+					DirectConnectionManagerService.returnConnection(conn);
+					
 			}
 			else
 			{

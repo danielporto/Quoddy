@@ -5,7 +5,8 @@ class EventBase
 	
 	static mapping = 
 	{
-		tablePerHierarchy false
+		tablePerHierarchy false;
+		version false;  id generator: 'assigned';
 	}
 	
 	static constraints = 
@@ -18,5 +19,4 @@ class EventBase
 	Date effectiveDate;
 	String name; // NOTE: do we really need this???
 	String	targetUuid;
-	
 }

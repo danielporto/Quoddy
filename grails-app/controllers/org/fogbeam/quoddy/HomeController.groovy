@@ -1,4 +1,5 @@
 package org.fogbeam.quoddy
+import java.sql.*
 
 class HomeController {
 
@@ -9,7 +10,7 @@ class HomeController {
 	def userGroupService;
 	
     def index = {
-    		
+		
     	def userId = params.userId;
     	def user = null;
 		def activities = new ArrayList<Activity>();
@@ -17,7 +18,6 @@ class HomeController {
 		def userDefinedStreams = new ArrayList<UserStream>(); 
 		def userLists = new ArrayList<UserList>();
 		def userGroups = new ArrayList<UserGroup>();
-		
 		if( userId != null )
     	{
 			println "getting User by userId: ${userId}";
@@ -42,9 +42,7 @@ class HomeController {
 		{
 			// TODO: this should take the selected UserStream into account when
 			// determining what activities to include in the activities list
-			
 			activities = activityStreamService.getRecentActivitiesForUser( user, 25 );
-				
 			def tempSysStreams = userStreamService.getSystemDefinedStreamsForUser( user );
 			systemDefinedStreams.addAll( tempSysStreams );
 			def tempUserStreams = userStreamService.getUserDefinedStreamsForUser( user );
@@ -56,12 +54,13 @@ class HomeController {
 			def tempUserGroups = userGroupService.getAllGroupsForUser( user );
 			userGroups.addAll( tempUserGroups );
 		}	
-		    
+
     	[user:user, 
 		  activities:activities, 
 		  sysDefinedStreams:systemDefinedStreams, 
 		  userDefinedStreams:userDefinedStreams,
 		  userLists:userLists,
 		  userGroups:userGroups];
+
     }
 }

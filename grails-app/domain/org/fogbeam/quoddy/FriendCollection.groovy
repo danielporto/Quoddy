@@ -8,5 +8,6 @@ class FriendCollection
 	Set<String> friends;	
 
 	static hasMany = [friends:String]
+	static mapping = { version false;  id generator: 'assigned'	 }
 	
 }
