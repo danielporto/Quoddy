@@ -4,9 +4,12 @@ import java.util.Date;
 import java.sql.*
 import java.util.List;
 
+import txstore.scratchpad.rdbms.jdbc.TxMudConnection;
+import txstore.scratchpad.rdbms.util.quoddy.*;
+
 class UserListService
 {
-	public List<UserList> getListsForUser( final User user, Connection conn=null )
+	public List<UserList> getListsForUser( final User user, TxMudConnection conn=null )
 	{
 		List<UserList> lists = new ArrayList<UserList>();
 		boolean needToCommit = false;
@@ -31,6 +34,13 @@ class UserListService
 		rs.close();
 				
 		if(needToCommit){
+			try{
+				System.out.println("Set empty shadow op for getting list for users");
+				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+				conn.setShadowOperation(dEm, 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			conn.commit();
 			DirectConnectionManagerService.returnConnection(conn);
 		}

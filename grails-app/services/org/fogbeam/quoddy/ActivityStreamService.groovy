@@ -1,7 +1,8 @@
 package org.fogbeam.quoddy;
 import java.util.Date;
 import java.sql.*;
-
+import txstore.scratchpad.rdbms.jdbc.TxMudConnection;
+import txstore.scratchpad.rdbms.util.quoddy.*;
 
 
 import java.util.Calendar
@@ -115,7 +116,7 @@ class ActivityStreamService {
 		// to build up this list above, and never bother storing the JMS Message instances
 		// at all...  but for now, just to get something so we can prototype the
 		// behavior up through the UI...
-		Connection conn1 = DirectConnectionManagerService.getConnection();
+		TxMudConnection conn1 = DirectConnectionManagerService.getConnection();
 		for( int i = 0; i < messages.size(); i++ )
 		{
 			Map msg = messages.get(i);
@@ -128,8 +129,16 @@ class ActivityStreamService {
 			activity.dateCreated = new Date( msg.originTime );
 			recentActivities.add( activity );	
 		}
-		if(messages.size()>0)
+		if(messages.size()>0){
+			try{
+				System.out.println("Set empty shadow op for get recent activity 1");
+				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+				conn1.setShadowOperation(dEm, 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			conn1.commit();
+		}
 		DirectConnectionManagerService.returnConnection(conn1);
 		println "recentActivities.size() = ${recentActivities.size()}"
 		
@@ -157,8 +166,9 @@ class ActivityStreamService {
 			
 			println "Using ${cutoffDate} as cutoffDate";
 			println "Using ${new Date(oldestOriginTime)} as oldestOriginTime";
-						
-			List<User> friends = userService.listFriends( user );
+			
+			TxMudConnection conn = DirectConnectionManagerService.getConnection();
+			List<User> friends = userService.listFriends( user, conn );
 			StringBuilder sb = new StringBuilder(); 
 			boolean friends_added = false; 
 			if( friends != null && friends.size() >= 0 ) 
@@ -187,7 +197,6 @@ class ActivityStreamService {
 				friendIds.add( user.id );
 
 				//ShareTarget streamPublic = ShareTarget.findByName( ShareTarget.STREAM_PUBLIC );
-				Connection conn = DirectConnectionManagerService.getConnection();
 				String sql = "select	id , version,	name, uuid from share_target where	name='"+ShareTarget.STREAM_PUBLIC +"'"; 
 				PreparedStatement stmt = conn.prepareStatement(sql);
 				ResultSet rs = null;
@@ -289,15 +298,23 @@ class ActivityStreamService {
 					}
 					stmt.close();
 					rs.close();
-					//println " query "+ sql;		
-					conn.commit();
-					DirectConnectionManagerService.returnConnection(conn);
+					//println " query "+ sql;	
+					
 					
 			}
 			else
 			{
 				println( "no friends, so no activity read from DB" );	
 			}
+			try{
+				System.out.println("Set empty shadow op for get recent activity 2");
+				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+				conn.setShadowOperation(dEm, 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			conn.commit();
+			DirectConnectionManagerService.returnConnection(conn);
 		}
 		else
 		{

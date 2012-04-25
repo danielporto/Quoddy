@@ -6,6 +6,9 @@ import org.fogbeam.quoddy.ldap.LDAPPerson
 import sun.misc.BASE64Encoder 
 import java.sql.*
 
+import txstore.scratchpad.rdbms.jdbc.TxMudConnection;
+import txstore.scratchpad.rdbms.util.quoddy.*;
+
 class LoginService 
 {
 	def userService;
@@ -17,7 +20,7 @@ class LoginService
 	{
 		User user = null;
 		//get a connection here
-		Connection conn = DirectConnectionManagerService.getConnection();
+		TxMudConnection conn = DirectConnectionManagerService.getConnection();
 		
 		// TODO: deal with authsource stuff, conver this stuff to use JAAS?
 		LocalAccount account = localAccountService.findAccountByUserId( userId, conn);
@@ -76,8 +79,16 @@ class LoginService
 			
 		}
 		println "commit in the login ";
+		//set shadow operation
+		try{
+			System.out.println("Set empty shadow op for login");
+			DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+			conn.setShadowOperation(dEm, 0);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		conn.commit();
-		
+		DirectConnectionManagerService.returnConnection(conn);
 		return user;	
 	}	
 

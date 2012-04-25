@@ -3,6 +3,9 @@ package org.fogbeam.quoddy
 import java.util.List
 import java.sql.*
 
+import txstore.scratchpad.rdbms.jdbc.TxMudConnection;
+import txstore.scratchpad.rdbms.util.quoddy.*;
+
 class UserGroupService
 {
 	
@@ -73,7 +76,7 @@ class UserGroupService
 	}
 
 	// get all groups where the User is the Owner OR is a member
-	public List<UserGroup> getAllGroupsForUser( final User user, Connection conn=null )
+	public List<UserGroup> getAllGroupsForUser( final User user, TxMudConnection conn=null )
 	{
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		
@@ -101,6 +104,14 @@ class UserGroupService
 		rs.close();
 						
 		if(needToCommit){
+			//set shadow operation
+			try{
+				System.out.println("Set empty shadow op for get all group users");
+				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+				conn.setShadowOperation(dEm, 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			conn.commit();
 			DirectConnectionManagerService.returnConnection(conn);
 		}

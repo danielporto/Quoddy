@@ -18,9 +18,9 @@
 --
 -- Table structure for table `activity`
 --
---DROP DATABASE IF EXISTS quoddy2;
---CREATE DATABASE quoddy2;
---connect quoddy2;
+DROP DATABASE IF EXISTS quoddy2;
+CREATE DATABASE quoddy2;
+connect quoddy2;
 
 DROP TABLE IF EXISTS `activity`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -37,7 +37,7 @@ CREATE TABLE `activity` (
   `actor_uuid` varchar(255) DEFAULT NULL,
   `content` varchar(255) NOT NULL,
   `generator_url` varchar(255) DEFAULT NULL,
-  `icon` tinyblob,
+  `icon` varchar(255),
   `object_content` varchar(255) DEFAULT NULL,
   `object_display_name` varchar(255) DEFAULT NULL,
   `object_image_height` varchar(255) DEFAULT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE `activity` (
   `target_url` varchar(255) DEFAULT NULL,
   `title` varchar(255) NOT NULL,
   `updated` datetime DEFAULT NULL,
-  `url` tinyblob NOT NULL,
+  `url` varchar(255) NOT NULL,
   `uuid` varchar(255) NOT NULL,
   `verb` varchar(255) NOT NULL,
   
@@ -88,7 +88,7 @@ DROP TABLE IF EXISTS `calendar_event`;
 CREATE TABLE `calendar_event` (
   `id` bigint(20) NOT NULL,
   `date_event_created` datetime NOT NULL,
-  `description` longtext,
+  `description` varchar(1000),
   `end_date` datetime DEFAULT NULL,
   `geo_lat` float NOT NULL,
   `geo_long` float NOT NULL,

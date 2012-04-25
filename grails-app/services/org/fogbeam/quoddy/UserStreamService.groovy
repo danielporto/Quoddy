@@ -3,9 +3,12 @@ package org.fogbeam.quoddy
 import java.util.Date;
 import java.sql.*;
 
+import txstore.scratchpad.rdbms.jdbc.TxMudConnection;
+import txstore.scratchpad.rdbms.util.quoddy.*;
+
 class UserStreamService
 {
-	public List<UserStream> getSystemDefinedStreamsForUser( final User user, Connection conn = null )
+	public List<UserStream> getSystemDefinedStreamsForUser( final User user, TxMudConnection conn = null )
 	{
 		List<UserStream> streams = new ArrayList<UserStream>();
 		boolean needToCommit = false;
@@ -28,6 +31,13 @@ class UserStreamService
 		stmt.close();
 		rs.close();
 		if(needToCommit){
+			try{
+				System.out.println("Set empty shadow op for getting system defined streams for user");
+				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+				conn.setShadowOperation(dEm, 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			conn.commit();
 			DirectConnectionManagerService.returnConnection(conn);
 		}
@@ -60,7 +70,7 @@ class UserStreamService
 	}
 
 		
-	public List<UserStream> getUserDefinedStreamsForUser( final User user, Connection conn=null )
+	public List<UserStream> getUserDefinedStreamsForUser( final User user, TxMudConnection conn=null )
 	{
 		List<UserStream> streams = new ArrayList<UserStream>();
 		boolean needToCommit = false;
@@ -84,6 +94,13 @@ class UserStreamService
 		stmt.close();
 		rs.close();
 		if(needToCommit){
+			try{
+				System.out.println("Set empty shadow op for getUserDefined streams for users");
+				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+				conn.setShadowOperation(dEm, 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			conn.commit();
 			DirectConnectionManagerService.returnConnection(conn);
 		}

@@ -3,6 +3,7 @@ import grails.util.Environment
 import org.fogbeam.quoddy.ShareTarget
 import org.fogbeam.quoddy.User
 import org.fogbeam.quoddy.profile.Profile
+import org.fogbeam.quoddy.QUODDY_TxMud_Proxy;
 
 class BootStrap {
 
@@ -11,10 +12,10 @@ class BootStrap {
 	def directConnectionManagerService;
 	def init = { servletContext ->
      
+		directConnectionManagerService.proxy = new QUODDY_TxMud_Proxy(0, 0, 10, "quoddy_txmud.xml", 1, 0, "quoddy_txmud_db.xml", 10);
 		directConnectionManagerService.initDatabasePool();
 		directConnectionManagerService.init();
-		//println "get only the original database";
-		//System.exit(0);
+		
 		 switch( Environment.current )
 	     {
 	         case Environment.DEVELOPMENT:

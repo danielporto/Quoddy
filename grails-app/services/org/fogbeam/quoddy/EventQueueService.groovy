@@ -3,6 +3,9 @@ package org.fogbeam.quoddy
 import java.util.Set
 import java.sql.*
 
+import txstore.scratchpad.rdbms.jdbc.TxMudConnection;
+import txstore.scratchpad.rdbms.util.quoddy.*;
+
 class EventQueueService 
 {	
 	def userService;
@@ -20,7 +23,7 @@ class EventQueueService
 		// all the appropriate queues
 		Set<Map.Entry<String, Deque<Map>>> entries = eventQueues.entrySet();
 		println "got entrySet from eventQueues object: ${entries}";
-		Connection conn = null;
+		TxMudConnection conn = null;
 		if(entries.size()>0){
 			conn = DirectConnectionManagerService.getConnection();
 		}
@@ -60,6 +63,13 @@ class EventQueueService
 			
 			if( ! msg.targetUuid.equals( streamPublic.uuid ))
 			{
+				try{
+					System.out.println("Set empty shadow op for onMessage 1");
+					DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+					conn.setShadowOperation(dEm, 0);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 				conn.commit();
 				DirectConnectionManagerService.returnConnection(conn);
 				return;
@@ -113,6 +123,13 @@ class EventQueueService
 			
 		}
 		if(conn != null){
+			try{
+				System.out.println("Set empty shadow op for onMessage 2");
+				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+				conn.setShadowOperation(dEm, 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			conn.commit();
 			DirectConnectionManagerService.returnConnection(conn);
 		}

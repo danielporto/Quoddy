@@ -7,6 +7,9 @@ import java.sql.*
 import org.fogbeam.quoddy.profile.Profile
 import org.springframework.jdbc.core.RowCallbackHandler;
 
+import txstore.scratchpad.rdbms.jdbc.TxMudConnection;
+import txstore.scratchpad.rdbms.util.quoddy.*;
+
 class UserService {
 
 	// injected by Spring, might be backed by LDAP version OR by local dB version;
@@ -19,7 +22,7 @@ class UserService {
 	// and again...  when finished, this will either be LdapPersonService or LocalAccountService, but we don't care.
 	def accountService;
 	
-	public User findUserByUserId( String userId, Connection conn=null )
+	public User findUserByUserId( String userId, TxMudConnection conn=null )
 	{
 		User user=null;
 		/*def conn = DirectConnectionManagerService.getConnection();
@@ -65,6 +68,13 @@ class UserService {
 		rs.close();
 		
 		if(needToCommit){
+			try{
+				System.out.println("Set empty shadow op for findUserByUserId");
+				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+				conn.setShadowOperation(dEm, 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			conn.commit();
 			DirectConnectionManagerService.returnConnection(conn);
 		}
@@ -193,7 +203,7 @@ class UserService {
 	public List<User> findAllUsers() 
 	{
 		List<User> users = new ArrayList<User>();
-		Connection conn = DirectConnectionManagerService.getConnection();
+		TxMudConnection conn = DirectConnectionManagerService.getConnection();
 		String sql = "select id, version,current_status_id,date_created,email,first_name ,full_name ,last_name ,profile_id,user_id ,uuid  from uzer";
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		ResultSet rs = null;
@@ -207,6 +217,15 @@ class UserService {
 		}
 		stmt.close();
 		rs.close();
+		//set shadow operation
+		
+		try{
+			System.out.println("Set empty shadow op for find all users");
+			DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+			conn.setShadowOperation(dEm, 0);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
 //		List<User> temp = User.findAll();
@@ -218,10 +237,14 @@ class UserService {
 		return users;	
 	}
 
-	public List<User> listFriends( User user ) 
+	public List<User> listFriends( User user, TxMudConnection conn=null ) 
 	{
 		//getConnection here
-		Connection conn = DirectConnectionManagerService.getConnection();
+		boolean needToCommit = false;
+		if(conn == null){
+			conn = DirectConnectionManagerService.getConnection();
+			needToCommit = true;
+		}
 		
 		List<User> friends = new ArrayList<User>();
 		List<User> temp = friendService.listFriends( user, conn );
@@ -229,9 +252,18 @@ class UserService {
 		{
 			friends.addAll( temp );
 		}
-	
-		conn.commit();
-		DirectConnectionManagerService.returnConnection(conn);
+		if(needToCommit){
+			//set shadow operation
+			try{
+				System.out.println("Set empty shadow op for list friends");
+				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+				conn.setShadowOperation(dEm, 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			conn.commit();
+			DirectConnectionManagerService.returnConnection(conn);
+		}
 		return friends;	
 	}
 		// ---

@@ -6,6 +6,9 @@ import java.util.Date;
 import java.util.List;
 import org.fogbeam.quoddy.DirectConnectionManagerService;
 
+import txstore.scratchpad.rdbms.jdbc.TxMudConnection;
+import txstore.scratchpad.rdbms.util.quoddy.*;
+
 class LocalFriendService 
 {
 	def directConnectionManagerService; 
@@ -89,7 +92,7 @@ class LocalFriendService
 	{
 		//IFollowCollection iFollowCollection = IFollowCollection.findByOwnerUuid( destinationUser.uuid );
 		IFollowCollection iFollowCollection = null;
-		Connection conn = DirectConnectionManagerService.getConnection();
+		TxMudConnection conn = DirectConnectionManagerService.getConnection();
 		//first get ifollow_collection_id
 		
 		//String sql1= " select id,version,date_created,owner_uuid from ifollow_collection where owner_uuid='"+destinationUser.uuid+"'";
@@ -148,6 +151,14 @@ class LocalFriendService
 			e.printStackTrace();
 		}
 		stmt.close();
+		//set shadow operation
+		try{
+			System.out.println("Set shadow op for add to follow");
+			DBQUODDYShdAddToFollow dATF = DBQUODDYShdAddToFollow.createOperation(iFollowCollection.dateCreated.toString(),destinationUser.uuid,(int)iFollowCollection.id,targetUser.uuid);
+			conn.setShadowOperation(dATF, 0);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
 	}
@@ -170,7 +181,7 @@ class LocalFriendService
 //		FriendCollection friendCollectionNF = FriendCollection.findByOwnerUuid( newFriend.uuid );
 //      FriendRequestCollection friendRequestsCU = FriendRequestCollection.findByOwnerUuid( currentUser.uuid );		
 		
-		Connection conn = DirectConnectionManagerService.getConnection();
+		TxMudConnection conn = DirectConnectionManagerService.getConnection();
 		
 		FriendCollection friendCollectionCU = LocalFriendService.findFriendCollectionByOwnerUuid( currentUser.uuid, conn );
 		FriendCollection friendCollectionNF = LocalFriendService.findFriendCollectionByOwnerUuid( newFriend.uuid, conn );
@@ -255,6 +266,16 @@ class LocalFriendService
 		}
 		stmt.close();
 	
+		//set shadow operation
+		
+		try{
+			System.out.println("Set shadow op for confirm friend");
+			DBQUODDYShdConfirmFriend dCF = DBQUODDYShdConfirmFriend.createOperation(now.toString(), friendCollectionCU.ownerUuid,(int)friendCollectionCU.id,
+				friendCollectionNF.ownerUuid,(int)friendCollectionNF.id,friendRequestsCU.ownerUuid,(int)friendRequestsCU.id,newFriend.uuid);
+			conn.setShadowOperation(dCF, 0);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
 //		friendCollectionCU.addToFriends( newFriend.uuid );
@@ -271,7 +292,7 @@ class LocalFriendService
 		
 		//FriendRequestCollection friendRequests = FriendRequestCollection.findByOwnerUuid( newFriend.uuid );
 		FriendRequestCollection friendRequests = null;
-		Connection conn = DirectConnectionManagerService.getConnection();
+		TxMudConnection conn = DirectConnectionManagerService.getConnection();
 		//String sql = "select id,version,date_created,owner_uuid from friend_request_collection where owner_uuid='"+newFriend.uuid+"'";
 		String sql = "select id,date_created,owner_uuid from friend_request_collection where owner_uuid='"+newFriend.uuid+"'";
 		PreparedStatement stmt = conn.prepareStatement(sql);
@@ -280,15 +301,34 @@ class LocalFriendService
 			rs = stmt.executeQuery();
 			if(rs.next()){
 				//sql = "update friend_request_collection set version="+(row.version+1)+",date_created='"+row.date_created+"',owner_uuid='"+newFriend.uuid+"' where id="+row.id+" and version="+row.version;
-				sql = "update friend_request_collection set date_created='"+rs.getDate("date_created")+"',owner_uuid='"+newFriend.uuid+"' where id="+rs.getInt("id");
+				int newFriendId = rs.getInt("id");
+				Date createDate = rs.getDate("date_created");
+				sql = "update friend_request_collection set date_created='"+createDate+"',owner_uuid='"+newFriend.uuid+"' where id="+newFriendId;
 				PreparedStatement stmt1 = conn.prepareStatement(sql);
 				stmt1.executeUpdate();
 				stmt1.close();
 				
-				sql = "insert into friend_request_collection_friend_requests (friend_request_collection_id, friend_requests_string) values ("+rs.getInt("id")+", '"+currentUser.uuid+"')";
+				sql = "insert into friend_request_collection_friend_requests (friend_request_collection_id, friend_requests_string) values ("+newFriendId+", '"+currentUser.uuid+"')";
 				stmt1 = conn.prepareStatement(sql);
 				stmt1.executeUpdate();
 				stmt1.close();
+				//set shadow operation
+				try{
+					System.out.println("Set really shadow op for add to Friend");
+					DBQUODDYShdAddToFriend dATF = DBQUODDYShdAddToFriend.createOperation(newFriendId,newFriend.uuid, createDate.toString(), currentUser.uuid);
+					conn.setShadowOperation(dATF, 0);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}else{
+				//set empty shadow operation
+				try{
+					System.out.println("Set empty shadow op for add to Friend");
+					DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+					conn.setShadowOperation(dEm, 0);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}catch(SQLException e){
 			e.printStackTrace();
@@ -332,7 +372,7 @@ class LocalFriendService
 		
 		// select ownerUuid from IFollowCollection where iFollow contains user.uuid 
 		// from Item item join item.labels lbls where 'hello' in (lbls)
-		Connection conn = DirectConnectionManagerService.getConnection();
+		TxMudConnection conn = DirectConnectionManagerService.getConnection();
 		
 //		String sql = "select id,version,date_created,owner_uuid from ifollow_collection inner join ifollow_collection_i_follow ifollow1_ on id=ifollow1_.ifollow_collection_id"+ 
 //				" where '"+user.uuid+"' in (ifollow1_.i_follow_string)";
@@ -353,6 +393,8 @@ class LocalFriendService
 		}catch(SQLException e){
 			e.printStackTrace();
 		}
+		stmt.close();
+		rs.close();
 		
 //		List<IFollowCollection> iFollowCollections = 
 //			IFollowCollection.executeQuery( 
@@ -364,6 +406,15 @@ class LocalFriendService
 			def userService = new UserService();
 			User follower = userService.findUserByUuid(collection.ownerUuid, conn);
 			followers.add( follower ); 	
+		}
+		
+		//set shadow operaration
+		try{
+			System.out.println("Set empty shadow op for list followers");
+			DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+			conn.setShadowOperation(dEm, 0);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
@@ -377,7 +428,7 @@ class LocalFriendService
 //		directConnectionManagerService = new DirectConnectionManagerService();
 //		def conn = directConnectionManagerService.getConnection();
 		
-		Connection conn = DirectConnectionManagerService.getConnection();
+		TxMudConnection conn = DirectConnectionManagerService.getConnection();
 		//first get ifollow_collection_id
 		
 		//String sql1= " select id,version,date_created,owner_uuid from ifollow_collection where owner_uuid='"+user.uuid+"'";
@@ -427,6 +478,14 @@ class LocalFriendService
 			peopleIFollow.add( iFollow );
 		}
 		
+		//set shadow operation
+		try{
+			System.out.println("Set empty shadow op for list iFollow");
+			DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+			conn.setShadowOperation(dEm, 0);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
 				
@@ -437,7 +496,7 @@ class LocalFriendService
 	{
 		List<FriendRequest> openFriendRequests = new ArrayList<FriendRequest>();
 		
-		Connection conn = DirectConnectionManagerService.getConnection();
+		TxMudConnection conn = DirectConnectionManagerService.getConnection();
 		//FriendRequestCollection friendRequestCollection = FriendRequestCollection.findByOwnerUuid( user.uuid );
 		FriendRequestCollection friendRequestCollection = this.findFriendRequestCollectionByOwnerUuid( user.uuid, conn);
 		
@@ -450,6 +509,15 @@ class LocalFriendService
 			User unconfirmedFriend =userService.findUserByUuid( unconfirmedFriendUuid, conn );
 			FriendRequest friendRequest = new FriendRequest( user, unconfirmedFriend );
 			openFriendRequests.add( friendRequest );
+		}
+		//set shadow operation
+		
+		try{
+			System.out.println("Set empty shadow op for list pending friend request");
+			DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+			conn.setShadowOperation(dEm, 0);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);

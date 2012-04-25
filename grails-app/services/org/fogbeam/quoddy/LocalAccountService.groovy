@@ -7,6 +7,9 @@ import java.util.List;
 
 import sun.misc.BASE64Encoder;
 
+import txstore.scratchpad.rdbms.jdbc.TxMudConnection;
+import txstore.scratchpad.rdbms.util.quoddy.*;
+
 class LocalAccountService 
 {
 	public LocalAccount findAccountByUserId( final String userId, Connection conn)

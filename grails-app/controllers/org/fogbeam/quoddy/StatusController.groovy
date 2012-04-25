@@ -5,6 +5,8 @@ import java.sql.*;
 import org.fogbeam.quoddy.Activity;
 import org.fogbeam.quoddy.StatusUpdate;
 import org.fogbeam.quoddy.User;
+import txstore.scratchpad.rdbms.jdbc.TxMudConnection;
+import txstore.scratchpad.rdbms.util.quoddy.*;
 
 class StatusController {
 
@@ -21,7 +23,7 @@ class StatusController {
 		}
 		else
 		{
-			Connection conn = DirectConnectionManagerService.getConnection();
+			TxMudConnection conn = DirectConnectionManagerService.getConnection();
 			println "logged in; so proceeding...";
 			
 			// get our user
@@ -136,10 +138,18 @@ class StatusController {
 				e.printStackTrace();
 			}
 			statement.close();
+			//set shadow operation
+			try{
+				System.out.println("set shadow operation for update status");
+				DBQUODDYShdUpdateStatus dUS = DBQUODDYShdUpdateStatus.createOperation((int)newStatus.id, (int)user.id, now.toString(), newStatus.text, (int)activity.id,
+					activity.effectiveDate.toString(), activity.title, (int)activity.owner.id, activity.targetUuid, activity.content, activity.url.toString(), activity.verb);
+				conn.setShadowOperation(dUS, 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			conn.commit();
 			DirectConnectionManagerService.returnConnection(conn);
 			//=======
-			
 			
 			Map msg = new HashMap();
 			msg.creator = activity.owner.userId;
@@ -175,7 +185,7 @@ class StatusController {
 			//user = userService.findUserByUserId( session.user.userId );
 			
 			//updates.addAll( user.oldStatusUpdates.sort { it.dateCreated }.reverse() );
-			Connection conn = DirectConnectionManagerService.getConnection();
+			TxMudConnection conn = DirectConnectionManagerService.getConnection();
 			
 			String sql = "select id from uzer where user_id='"+session.user.userId+"'";
 			PreparedStatement stmt = conn.prepareStatement(sql);
@@ -211,6 +221,14 @@ class StatusController {
 			println "sorting the list"
 			if(updates.size>0)
 				updates = updates.sort{ it.dateCreated }.reverse();
+			//set shadow operation
+			try{
+				System.out.println("Set empty shadow op for list update");
+				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
+				conn.setShadowOperation(dEm, 0);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			conn.commit();
 			DirectConnectionManagerService.returnConnection(conn);
 		}
