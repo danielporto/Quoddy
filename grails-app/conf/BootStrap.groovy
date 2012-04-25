@@ -12,7 +12,8 @@ class BootStrap {
 	def init = { servletContext ->
      
 		directConnectionManagerService.init();
-		
+		//println "get only the original database";
+		//System.exit(0);
 		 switch( Environment.current )
 	     {
 	         case Environment.DEVELOPMENT:
