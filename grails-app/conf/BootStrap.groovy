@@ -13,7 +13,8 @@ class BootStrap {
      
 		directConnectionManagerService.initDatabasePool();
 		directConnectionManagerService.init();
-		
+		//println "get only the original database";
+		//System.exit(0);
 		 switch( Environment.current )
 	     {
 	         case Environment.DEVELOPMENT:
