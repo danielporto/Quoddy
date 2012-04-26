@@ -19,12 +19,12 @@ class BootStrap {
 		 switch( Environment.current )
 	     {
 	         case Environment.DEVELOPMENT:
-	             createSomeUsers();
+	             //createSomeUsers();
 				 createShareTargets();
 	             break;
 	         case Environment.PRODUCTION:
 	             println "No special configuration required";
-				 createSomeUsers();
+				 //createSomeUsers();
 				 createShareTargets();
 				 break;
 	     }     
