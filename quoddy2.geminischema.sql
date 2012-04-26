@@ -18,9 +18,6 @@
 --
 -- Table structure for table `activity`
 --
---DROP DATABASE IF EXISTS quoddy2;
---CREATE DATABASE quoddy2;
---connect quoddy2;
 
 
 DROP TABLE IF EXISTS `activity`;
@@ -581,7 +578,7 @@ DROP TABLE IF EXISTS `local_account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `local_account` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `version` bigint(20) NOT NULL,
   `password` varchar(255) NOT NULL,
   `username` varchar(255) NOT NULL,
@@ -1273,7 +1270,7 @@ DROP TABLE IF EXISTS `uzer`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `uzer` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `version` bigint(20) NOT NULL,
   `current_status_id` bigint(20) DEFAULT NULL,
   `date_created` datetime NOT NULL,
