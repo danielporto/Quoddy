@@ -5,7 +5,7 @@
       <storageShim ssIP='thor18.mpi-sws.org' ssPort='60002'/>
     </storageShims>
     <webProxies wpNum='1'>
-      <webproxy wpPort='60003' wpIP='wks-40-12.mpi-sws.org'/>
+      <webproxy wpPort='60003' wpIP='thor03.mpi-sws.org'/>
     </webProxies>
   </dataCenter>
 </dataCenters>
