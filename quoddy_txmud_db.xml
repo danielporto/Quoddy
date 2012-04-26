@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <databases dbNum='1'>
-	<database dcId='0' dbId='0' dbHost='thor70.mpi-sws.org' dbPort='50000' dbUser='root' dbPwd='101010' 
-	dbName='quoddy2'   tableList='status_update,share_target,event_base,activity,uzer,calendar_event,friend_request_collection,friend_collection,ifollow_collection,local_account,friend_collection_friends,friend_request_collection_friend_requests,ifollow_collection_i_follow,user_list,uzer,user_stream'    
+	<database dcId='0' dbId='0' dbHost='thor70.mpi-sws.org' dbPort='53306' dbUser='root' dbPwd='101010' 
+	dbName='quoddy2'   tableList='status_update,share_target,event_base,activity,uzer,calendar_event,friend_request_collection,friend_collection,ifollow_collection,local_account,friend_collection_friends,friend_request_collection_friend_requests,ifollow_collection_i_follow,user_list,uzer,user_stream,user_group,user_group_uzer'    
 	tableLWW=''         
 	talbeOps=''             
-	redTable='status_update,share_target,event_base,activity,uzer,calendar_event,friend_request_collection,friend_collection,ifollow_collection,local_account,friend_collection_friends,friend_request_collection_friend_requests,ifollow_collection_i_follow,user_list,uzer,user_stream' 
+	redTable='status_update,share_target,event_base,activity,uzer,calendar_event,friend_request_collection,friend_collection,ifollow_collection,local_account,friend_collection_friends,friend_request_collection_friend_requests,ifollow_collection_i_follow,user_list,uzer,user_stream,user_group,user_group_uzer' 
 	blueTable='' url_prefix='jdbc:mysql://' > 
 	</database>
 </databases>

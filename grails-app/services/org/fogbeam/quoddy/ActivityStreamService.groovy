@@ -105,8 +105,8 @@ class ActivityStreamService {
 			}
 		}
 		
-		println "oldestOriginTime: ${oldestOriginTime}";
-		println "as date: " + new Date( oldestOriginTime);
+//		println "oldestOriginTime: ${oldestOriginTime}";
+//		println "as date: " + new Date( oldestOriginTime);
 		
 		// convert our messages to Activity instances and
 		// put them in this list...

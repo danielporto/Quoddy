@@ -43,8 +43,6 @@ class UserService {
 		if(conn == null){
 			conn = DirectConnectionManagerService.getConnection();
 			needToCommit = true;
-		}else{
-			println "I already have a connection";
 		}
 		
 		String sql = "select id, current_status_id, date_created, email, first_name, full_name,\
@@ -57,7 +55,7 @@ class UserService {
 				println "we found a user with userId " + userId;
 				user = new User(uuid:rs.getString("uuid"), userId:rs.getString("user_id"), dateCreated:rs.getDate("date_created"),firstName:rs.getString("first_name"),lastName:rs.getString("last_name"),email:rs.getString("email"));
 				user.id = (long)rs.getInt("id");
-				println "user id is : " + user.id;
+				//println "user id is : " + user.id;
 			}else{
 				println "sorry we didn't find a user with userId " + userId;
 			}
@@ -101,7 +99,6 @@ class UserService {
 				user.id = (long)rs.getInt("id");
 			}else{
 				println "sorry we didn't find a user with userId " + uuid;
-				return user;
 			}
 		}catch(SQLException e){
 			e.printStackTrace();
@@ -204,7 +201,10 @@ class UserService {
 	{
 		List<User> users = new ArrayList<User>();
 		TxMudConnection conn = DirectConnectionManagerService.getConnection();
-		String sql = "select id, version,current_status_id,date_created,email,first_name ,full_name ,last_name ,profile_id,user_id ,uuid  from uzer";
+		Random diceRoller = new Random();
+		double range = diceRoller.nextDouble();
+		String sql = "select id, version,current_status_id,date_created,email,first_name ,full_name ,last_name ,profile_id,user_id ,uuid  from uzer where id > \
+					((select max(id) from uzer)*"+range+") and id <= (((select max(id) from uzer)*"+range+")+50)";
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		ResultSet rs = null;
 		try{

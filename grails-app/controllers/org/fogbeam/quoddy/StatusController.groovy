@@ -179,7 +179,7 @@ class StatusController {
 		}
 		else
 		{
-			println "logged in; so proceeding...";
+			//println "logged in; so proceeding...";
 			
 			// get our user
 			//user = userService.findUserByUserId( session.user.userId );

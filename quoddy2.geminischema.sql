@@ -580,7 +580,7 @@ DROP TABLE IF EXISTS `local_account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `local_account` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `version` bigint(20) NOT NULL,
   `password` varchar(255) NOT NULL,
   `username` varchar(255) NOT NULL,
@@ -1272,7 +1272,7 @@ DROP TABLE IF EXISTS `uzer`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `uzer` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL,
   `version` bigint(20) NOT NULL,
   `current_status_id` bigint(20) DEFAULT NULL,
   `date_created` datetime NOT NULL,
@@ -1313,3 +1313,24 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2012-04-25  6:17:51
+
+use quoddy2;
+DELIMITER //
+CREATE PROCEDURE preload()
+BEGIN
+SELECT actor_content FROM activity WHERE actor_content IS NOT NULL;
+SELECT date_created FROM event_base WHERE date_created IS NOT NULL;
+SELECT date_created FROM friend_collection WHERE date_created IS NOT NULL;
+SELECT friends_string FROM friend_collection_friends WHERE friends_string IS NOT NULL;
+SELECT date_created FROM friend_request_collection WHERE date_created IS NOT NULL;
+SELECT friend_requests_string FROM friend_request_collection_friend_requests WHERE friend_requests_string IS NOT NULL;
+SELECT date_created FROM ifollow_collection WHERE date_created IS NOT NULL;
+SELECT ifollow_collection_id FROM ifollow_collection_i_follow WHERE ifollow_collection_id IS NOT NULL;
+SELECT password FROM local_account WHERE password IS NOT NULL;
+SELECT name FROM share_target WHERE name IS NOT NULL;
+SELECT creator_id FROM status_update WHERE creator_id IS NOT NULL;
+SELECT date_created FROM user_stream WHERE date_created IS NOT NULL;
+SELECT current_status_id FROM uzer WHERE current_status_id IS NOT NULL;
+END //
+DELIMITER ;
+
