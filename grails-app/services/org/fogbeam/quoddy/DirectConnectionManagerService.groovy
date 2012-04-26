@@ -12,7 +12,7 @@ class DirectConnectionManagerService {
 	static AtomicInteger shareTargetFactory;
 	static AtomicInteger eventBaseFactory;
 	static String className = "com.mysql.jdbc.Driver";
-	static String connectionUrl = "jdbc:mysql://localhost:50000/quoddy2";
+	static String connectionUrl = "jdbc:mysql://localhost:53306/quoddy2";
 	static String connectionUserName = "root";
 	static String connectionPassword = "101010";
 	static int maxConnPool = 100;
