@@ -22,7 +22,7 @@ class StatusController {
 		else
 		{
 			Connection conn = DirectConnectionManagerService.getConnection();
-			println "logged in; so proceeding...";
+			//println "logged in; so proceeding...";
 			
 			// get our user
 			user = userService.findUserByUserId( session.user.userId, conn);
@@ -169,7 +169,7 @@ class StatusController {
 		}
 		else
 		{
-			println "logged in; so proceeding...";
+			//println "logged in; so proceeding...";
 			
 			// get our user
 			//user = userService.findUserByUserId( session.user.userId );
@@ -214,7 +214,7 @@ class StatusController {
 			conn.commit();
 			DirectConnectionManagerService.returnConnection(conn);
 		}
-		println "now is going to do something wird"
+		//println "now is going to do something wird"
 		[updates:updates]
 	}
 	

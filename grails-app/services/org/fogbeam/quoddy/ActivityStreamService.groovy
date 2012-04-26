@@ -104,8 +104,8 @@ class ActivityStreamService {
 			}
 		}
 		
-		println "oldestOriginTime: ${oldestOriginTime}";
-		println "as date: " + new Date( oldestOriginTime);
+//		println "oldestOriginTime: ${oldestOriginTime}";
+//		println "as date: " + new Date( oldestOriginTime);
 		
 		// convert our messages to Activity instances and
 		// put them in this list...
@@ -131,7 +131,7 @@ class ActivityStreamService {
 		if(messages.size()>0)
 			conn1.commit();
 		DirectConnectionManagerService.returnConnection(conn1);
-		println "recentActivities.size() = ${recentActivities.size()}"
+//		println "recentActivities.size() = ${recentActivities.size()}"
 		
 		/* NOTE: here, we need to make sure we don't retrieve anything NEWER than the OLDEST
 		 * message we may have in hand - that we received from the queue.  Otherwise, we risk
@@ -155,8 +155,8 @@ class ActivityStreamService {
 			cal.add(Calendar.HOUR_OF_DAY, -600 );
 			Date cutoffDate = cal.getTime();
 			
-			println "Using ${cutoffDate} as cutoffDate";
-			println "Using ${new Date(oldestOriginTime)} as oldestOriginTime";
+//			println "Using ${cutoffDate} as cutoffDate";
+//			println "Using ${new Date(oldestOriginTime)} as oldestOriginTime";
 						
 			List<User> friends = userService.listFriends( user );
 			StringBuilder sb = new StringBuilder(); 

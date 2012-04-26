@@ -2,6 +2,8 @@ package org.fogbeam.quoddy
 import java.sql.*
 import java.util.concurrent.atomic.AtomicInteger
 
+import org.fogbeam.quoddy.system.settings.SystemSettings;
+
 class DirectConnectionManagerService {
 
     static transactional = true
@@ -35,6 +37,7 @@ class DirectConnectionManagerService {
 	
 	static synchronized Connection getConnection(){
 		if(availableConnPool.size()>0){
+			System.out.println("+++++get Connection available pool size: " +(availableConnPool.size()-1));
 			return availableConnPool.pop();
 		}
 		return null;
@@ -52,6 +55,7 @@ class DirectConnectionManagerService {
 	
 	static synchronized void returnConnection(Connection conn){
 		availableConnPool.push(conn);
+		System.out.println("-----return Connection available connection pool size: " + availableConnPool.size());
 	}
 	
 	static init(){

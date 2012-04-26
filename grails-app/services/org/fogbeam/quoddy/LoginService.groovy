@@ -33,7 +33,7 @@ class LoginService
 			trySecondAuthSource = false;  // this is a local user
 			// verify credentials, verify is existing User, load User	
 			String md5HashSubmitted = digestMd5( password );
-			println "md5HashSubmitted: ${md5HashSubmitted}";
+			//println "md5HashSubmitted: ${md5HashSubmitted}";
 			if( md5HashSubmitted.equals( account.password ))
 			{
 				println "login successful";
@@ -56,7 +56,7 @@ class LoginService
 			{
 				// verify credentials, verify is existing User, load User
 				String md5HashSubmitted = digestMd5( password );
-				println "md5HashSubmitted: ${md5HashSubmitted}";
+				//println "md5HashSubmitted: ${md5HashSubmitted}";
 				if( md5HashSubmitted.equals( person.userpassword ))
 				{
 					println "login successful";
@@ -75,7 +75,7 @@ class LoginService
 			}
 			
 		}
-		println "commit in the login ";
+		//println "commit in the login ";
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
 		return user;	

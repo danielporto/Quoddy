@@ -285,7 +285,7 @@ class UserController {
 	
 		List<User> allusers = userService.findAllUsers();
 		
-		println "Found ${allusers.size()} users\n";
+		//println "Found ${allusers.size()} users\n";
 		
 		[users:allusers];
 	}

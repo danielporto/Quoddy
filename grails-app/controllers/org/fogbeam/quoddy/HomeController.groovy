@@ -11,6 +11,7 @@ class HomeController {
 	
     def index = {
 		
+		long startTime = System.nanoTime();
     	def userId = params.userId;
     	def user = null;
 		def activities = new ArrayList<Activity>();
@@ -53,6 +54,10 @@ class HomeController {
 		
 			def tempUserGroups = userGroupService.getAllGroupsForUser( user );
 			userGroups.addAll( tempUserGroups );
+			
+			System.out.println("=====>home with user " + user.userId + " in " + (System.nanoTime()-startTime)*0.000001 + " ms");
+		}else{
+			System.out.println("=====>home without user in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 		}	
 
     	[user:user, 

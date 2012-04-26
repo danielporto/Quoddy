@@ -40,8 +40,6 @@ class UserService {
 		if(conn == null){
 			conn = DirectConnectionManagerService.getConnection();
 			needToCommit = true;
-		}else{
-			println "I already have a connection";
 		}
 		
 		String sql = "select id, current_status_id, date_created, email, first_name, full_name,\
@@ -91,7 +89,6 @@ class UserService {
 				user.id = (long)rs.getInt("id");
 			}else{
 				println "sorry we didn't find a user with userId " + uuid;
-				return user;
 			}
 		}catch(SQLException e){
 			e.printStackTrace();
@@ -224,6 +221,7 @@ class UserService {
 	public List<User> listFriends( User user ) 
 	{
 		//getConnection here
+		System.out.println("list friends ");
 		Connection conn = DirectConnectionManagerService.getConnection();
 		
 		List<User> friends = new ArrayList<User>();
