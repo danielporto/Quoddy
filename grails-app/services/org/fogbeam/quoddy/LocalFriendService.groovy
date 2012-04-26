@@ -21,7 +21,7 @@ class LocalFriendService
 		try{
 			rs = stmt.executeQuery();
 			if(rs.next()){
-				println "we find a friend collection with " + uuid;
+				//println "we find a friend collection with " + uuid;
 				friendsCollection = new FriendCollection(dateCreated:rs.getDate("date_created"),ownerUuid:rs.getString("owner_uuid"));
 				friendsCollection.id=rs.getInt("id");
 			}else{
@@ -321,7 +321,7 @@ class LocalFriendService
 			User friend = userService.findUserByUuid(friendUuid, conn);
 			friends.add( friend );
 		}
-		println "returning friends: ${friends}";
+		//println "returning friends: ${friends}";
 		return friends;
 	}
 	

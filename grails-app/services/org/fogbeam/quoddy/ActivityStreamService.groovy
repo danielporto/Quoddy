@@ -168,7 +168,7 @@ class ActivityStreamService {
 				for( User friend: friends )
 				{
 					def id = friend.id;
-					println( "Adding friend id: ${id}, userId: ${friend.userId} to list" );
+					//println( "Adding friend id: ${id}, userId: ${friend.userId} to list" );
 					friendIds.add( id );
 					
 					sb.append(id);

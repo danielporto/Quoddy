@@ -77,7 +77,7 @@ class LoginService
 		}
 		println "commit in the login ";
 		conn.commit();
-		
+		DirectConnectionManagerService.returnConnection(conn);
 		return user;	
 	}	
 
