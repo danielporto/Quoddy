@@ -1,5 +1,8 @@
 package org.fogbeam.quoddy;
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.Date;
+import java.net.URL;
 import java.sql.*;
 
 
@@ -151,14 +154,16 @@ class ActivityStreamService {
 			// step backwards into history as far as (they want to go | as far as we let them go)
 			
 			
-			Calendar cal = Calendar.getInstance();
+			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			cal.add(Calendar.HOUR_OF_DAY, -600 );
-			Date cutoffDate = cal.getTime();
+			String cutoffDate = dateFormat.format(cal.getTime());
 			
 //			println "Using ${cutoffDate} as cutoffDate";
 //			println "Using ${new Date(oldestOriginTime)} as oldestOriginTime";
 						
 			List<User> friends = userService.listFriends( user );
+			Hashtable<Integer,User> friendsTable = new Hashtable<Integer, User>(300);
 			StringBuilder sb = new StringBuilder(); 
 			boolean friends_added = false; 
 			if( friends != null && friends.size() >= 0 ) 
@@ -174,6 +179,9 @@ class ActivityStreamService {
 					sb.append(id);
 					sb.append(",");
 					friends_added=true;
+					
+					//added by Cheng
+					friendsTable.put((int)friend.id, friend);
 				}
 				if(friends_added)
 					sb.deleteCharAt(sb.length()-1);
@@ -272,15 +280,25 @@ class ActivityStreamService {
 					from event_base eventbase0_"+
 					" left outer join 	activity eventbase0_1_	on eventbase0_.id=eventbase0_1_.id "+ 
 					" left outer join	calendar_event eventbase0_2_ on eventbase0_.id=eventbase0_2_.id \
-					where	eventbase0_.effective_date>='"+cutoffDate+"'	and (	eventbase0_.owner_id in (	"+sb.toString()+"		)	)	and eventbase0_.effective_date<'"+new Date( oldestOriginTime)+"' and eventbase0_.target_uuid='"+streamPublic.uuid+"' \
+					where	eventbase0_.effective_date>='"+cutoffDate+"'	and (	eventbase0_.owner_id in (	"+sb.toString()+"		)	)	and eventbase0_.effective_date<'"+dateFormat.format(oldestOriginTime)+"' and eventbase0_.target_uuid='"+streamPublic.uuid+"' \
 					order by eventbase0_.effective_date desc limit "+ recordsToRetrieve;
+					
+					//System.out.println("get recent activity" + sql);
 
 					stmt = conn.prepareStatement(sql);
 					try{
 						rs = stmt.executeQuery();
 						List<EventBase> queryResults= new ArrayList<EventBase>();
 						while(rs.next()){
-							queryResults.add(new EventBase(owner:rs.getInt("eventbase0_.owner_id"), dateCreated:rs.getDate("eventbase0_.date_created"), effectiveDate:rs.getDate("eventbase0_.effective_date"), name:rs.getString("eventbase0_.name"), targetUuid:rs.getString("eventbase0_.target_uuid")));
+							//queryResults.add(new EventBase(owner:rs.getInt("eventbase0_.owner_id"), dateCreated:rs.getDate("eventbase0_.date_created"), effectiveDate:rs.getDate("eventbase0_.effective_date"), name:rs.getString("eventbase0_.name"), targetUuid:rs.getString("eventbase0_.target_uuid")));
+							User owner1 = friendsTable.get(rs.getInt("eventbase0_.owner_id"));
+							queryResults.add(new Activity(id:rs.getInt("eventbase0_.id"),owner:owner1, dateCreated:rs.getDate("eventbase0_.date_created"), effectiveDate:rs.getDate("eventbase0_.effective_date"), name:rs.getString("eventbase0_.name"), targetUuid:rs.getString("eventbase0_.target_uuid"),
+								content:rs.getString("eventbase0_1_.actor_content"),published:rs.getDate("eventbase0_1_.published"), title:rs.getString("eventbase0_1_.title"),updated:rs.getDate("eventbase0_1_.updated"),url:rs.getString("eventbase0_1_.url"),verb:rs.getString("eventbase0_1_.verb"),
+								icon:rs.getString("eventbase0_1_.icon"),uuid:rs.getString("eventbase0_1_.uuid"),actorUuid:rs.getString("eventbase0_1_.actor_uuid"),	actorUrl:rs.getString("eventbase0_1_.actor_url"),actorContent:rs.getString("eventbase0_1_.actor_content"),actorDisplayName:rs.getString("eventbase0_1_.actor_display_name"),
+								actorObjectType:rs.getString("eventbase0_1_.actor_object_type"),actorImageUrl:rs.getString("eventbase0_1_.object_image_url"),actorImageHeight:rs.getString("eventbase0_1_.actor_image_height"),actorImageWidth:rs.getString("eventbase0_1_.actor_image_width"),objectUuid:rs.getString("eventbase0_1_.object_uuid"),
+								objectUrl:rs.getString("eventbase0_1_.object_url"),objectContent:rs.getString("eventbase0_1_.object_content"),objectDisplayName:rs.getString("eventbase0_1_.object_display_name"),objectObjectType:rs.getString("eventbase0_1_.object_object_type"),objectImageUrl:rs.getString("eventbase0_1_.object_image_url"),
+								objectImageHeight:rs.getString("eventbase0_1_.object_image_height"),objectImageWidth:rs.getString("eventbase0_1_.object_image_width"),targetUrl:rs.getString("eventbase0_1_.target_url"),targetContent:rs.getString("eventbase0_1_.target_content"),targetDisplayName:rs.getString("eventbase0_1_.target_display_name"),
+								targetObjectType:rs.getString("eventbase0_1_.target_object_type"),targetImageUrl:rs.getString("eventbase0_1_.target_image_url"),targetImageHeight:rs.getString("eventbase0_1_.target_image_height"),targetImageWidth:rs.getString("eventbase0_1_.target_image_width"),generatorUrl:rs.getString("eventbase0_1_.generator_url"),providerUrl:rs.getString("eventbase0_1_.provider_url")));
 							}
 						println "adding ${queryResults.size()} activities read from DB";
 						recentActivities.addAll( queryResults );
