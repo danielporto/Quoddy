@@ -12,7 +12,7 @@ class ProfilePicController
 		{
 			//println( "params.userId found: ${params.id}");
 			String filePath = 
-				"/var/tmp/Quoddy/profilepics/${params.id}/${params.id}_profile_thumbnail48x48.jpg";
+				"/var/tmp/Quoddy/profilepics/${params.id}_profile_thumbnail48x48.jpg";
 			//println( "filepath is ${filePath}");
 			File thumbnailFile = new File(filePath);
 			byte[] image = thumbnailFile.getBytes();
