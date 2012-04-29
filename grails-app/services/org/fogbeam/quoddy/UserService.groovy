@@ -52,7 +52,8 @@ class UserService {
 				//println "we found a user with userId " + userId;
 				user = new User(uuid:rs.getString("uuid"), userId:rs.getString("user_id"), dateCreated:rs.getDate("date_created"),firstName:rs.getString("first_name"),lastName:rs.getString("last_name"),email:rs.getString("email"));
 				user.id = (long)rs.getInt("id");
-				//println "user id is : " + user.id;
+				println "user uuid from db: " + rs.getString("uuid");
+				println "user uuid is : " + user.uuid;
 			}else{
 				println "sorry we didn't find a user with userId " + userId;
 			}
@@ -69,6 +70,41 @@ class UserService {
 		
 		return user;
 	}	
+	
+	/*
+	 * create a function to fetch user by integer user id
+	 */
+	
+	public User findUserById( final int id, Connection conn )
+	{
+		//User user = User.findByUuid( uuid );
+//		String sql = "select id ,version,current_status_id, date_created, email, first_name, full_name, last_name, profile_id, user_id, "+
+//		             "uuid from uzer where uuid='"+uuid+"'"
+		User user = null;
+		String sql = "select id, current_status_id, date_created, email, first_name, full_name, last_name, profile_id, user_id, "+
+		"uuid from uzer where id='"+id+"'"
+
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		ResultSet rs = null;
+		try{
+			rs = stmt.executeQuery();
+			if(rs.next()){
+				//println "we find a user with " + uuid;
+				user = new User(uuid:rs.getString("uuid"), userId:rs.getString("user_id"), dateCreated:rs.getDate("date_created"),firstName:rs.getString("first_name"),lastName:rs.getString("last_name"),email:rs.getString("email"));
+				user.id = (long)rs.getInt("id");
+			}else{
+				println "sorry we didn't find a user with userId " + uuid;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		stmt.close();
+		rs.close();
+		
+		return user;
+			
+	}
+	
 	
 	public User findUserByUuid( final String uuid, Connection conn )
 	{

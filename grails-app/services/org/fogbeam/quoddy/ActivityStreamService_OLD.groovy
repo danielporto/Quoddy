@@ -1,5 +1,7 @@
 package org.fogbeam.quoddy;
 
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.Calendar;
 
 import org.fogbeam.quoddy.Activity;
@@ -24,9 +26,10 @@ class ActivityStreamService_OLD {
 		}
 		
 		// Entry.executeQuery( "select entry from Entry as entry, User as user where user.userId = ? and entry not in elements(user.hiddenEntries) order by entry.dateCreated desc", [user.userId] )
-		Calendar cal = Calendar.getInstance();
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		cal.add(Calendar.HOUR_OF_DAY, -14 );
-		Date cutoffDate = cal.getTime();
+		String cutoffDate = dateFormat.format(cal.getTime());
 		
 		println "Using ${cutoffDate} as cutoffDate";
 		
