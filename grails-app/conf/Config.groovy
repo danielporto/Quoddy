@@ -104,7 +104,7 @@ log4j = {
     //}
 
 	// debug  
-	trace 'org.hibernate.type'
+	//trace 'org.hibernate.type'
 	//debug 'org.hibernate.SQL'
 
 	

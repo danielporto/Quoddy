@@ -46,7 +46,7 @@ class ActivityStreamController
 		{
 			page = "1";
 		}
-		println "getContentHtml requested page: ${page}";
+		//println "getContentHtml requested page: ${page}";
 		def activities = new ArrayList<Activity>();
 		if( user != null )
 		{
@@ -69,10 +69,10 @@ class ActivityStreamController
 		switch(request.method){
 			case "POST":
 				// def originTime = new Date().getTime();
-			  println "Create\n"
+			  //println "Create\n"
 			  // String json = request.reader.text;
 			  String json = params.activityJson;
-			  println("Got json:\n " + json );
+			  //println("Got json:\n " + json );
 			  
 			  ObjectMapper mapper = new ObjectMapper(); // can reuse, share globally
 			  
@@ -91,7 +91,7 @@ class ActivityStreamController
 			  // msg.published = activity.published;
 			  msg.originTime = activity.dateCreated.time;
 			  
-			  println "sending message to JMS";
+			  //println "sending message to JMS";
 			  jmsService.send( queue: 'uitestActivityQueue', msg, 'standard', null );
 			  
 			  // println streamEntry.toString();

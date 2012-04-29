@@ -8,7 +8,7 @@ dataSource {
 	username = "root"
 	password = "101010"
 	// password = ""
-	logSql=true
+	logSql=false
 }
 hibernate {
     cache.use_second_level_cache=true
@@ -20,7 +20,7 @@ environments {
 	development {
 		dataSource {
 			dbCreate = "update" // one of 'create', 'create-drop','update'
-			url = "jdbc:mysql://localhost:53306/quoddy2";
+			url = "jdbc:mysql://thor05.mpi-sws.org:53306/quoddy2";
 			// dbCreate = "create-drop"
 			// url = "jdbc:hsqldb:mem:devDb
 		}
@@ -29,14 +29,14 @@ environments {
 		dataSource {
 			dbCreate = "create-drop"
 			// dbCreate = "create-drop"
-			url = "jdbc:mysql://localhost:53306/quoddy2";
+			url = "jdbc:mysql://thor05.mpi-sws.org:53306/quoddy2";
 		}
 	}
 	production {
 		dataSource {
 			dbCreate = "update" // one of 'create', 'create-drop','update'
 			// dbCreate = "create-drop"
-			url = "jdbc:mysql://localhost:53306/quoddy2";
+			url = "jdbc:mysql://thor05.mpi-sws.org:53306/quoddy2";
 		}
 	}
 }

@@ -36,7 +36,7 @@ class LoginService
 			//println "md5HashSubmitted: ${md5HashSubmitted}";
 			if( md5HashSubmitted.equals( account.password ))
 			{
-				println "login successful";
+				//println "login successful";
 				
 				// now find a User that matches this account
 				user = userService.findUserByUserId( account.username, conn);
@@ -59,7 +59,7 @@ class LoginService
 				//println "md5HashSubmitted: ${md5HashSubmitted}";
 				if( md5HashSubmitted.equals( person.userpassword ))
 				{
-					println "login successful";
+					//println "login successful";
 					
 					// now find a User that matches this account
 					user = userService.findUserByUserId( person.uid );

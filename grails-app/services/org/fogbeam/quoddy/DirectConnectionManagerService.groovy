@@ -14,12 +14,27 @@ class DirectConnectionManagerService {
 	static AtomicInteger shareTargetFactory;
 	static AtomicInteger eventBaseFactory;
 	static String className = "com.mysql.jdbc.Driver";
-	static String connectionUrl = "jdbc:mysql://localhost:53306/quoddy2";
+	static String connectionUrl = "jdbc:mysql://thor05.mpi-sws.org:53306/quoddy2";
 	static String connectionUserName = "root";
 	static String connectionPassword = "101010";
 	static int maxConnPool = 100;
 	static Vector<Connection> availableConnPool = new Vector<Connection>();
 	static int delta = 1;
+	
+	//topology file
+	static int dcId;
+	static int proxyId;
+	static int totalproxies;
+	static int globalProxyId;
+	
+	static void setParameters(){
+		//read from a file, then dcId and proxyId be set
+		dcId = 0;
+		proxyId = 0;
+		globalProxyId = 0;
+		totalproxies = 1;
+		delta = totalproxies;
+	}
 	
 	static Connection createConnection(){
 		Connection con = null;
@@ -44,6 +59,7 @@ class DirectConnectionManagerService {
 	}
 	
 	static synchronized void initDatabasePool(){
+		setParameters();
 		println "initialize database pool with number: "+maxConnPool;
 		int connectionNum = maxConnPool;
 		while(connectionNum > 0){
@@ -59,6 +75,7 @@ class DirectConnectionManagerService {
 	}
 	
 	static init(){
+		System.err.println("my globalProxyId: " + globalProxyId + " totalproxy " + totalproxies);
 		Connection conn = getConnection();
 		ResultSet rs = null;
 		Statement stmt = conn.createStatement();
@@ -69,6 +86,7 @@ class DirectConnectionManagerService {
 				n = rs.getInt(1);
 			}else
 				n = 0;
+			n = n + globalProxyId;
 			friendRequestCollectionFactory = new AtomicInteger(n);
 			println "set friend request collection factory id: "+n;
 		}catch(SQLException e){
@@ -81,6 +99,7 @@ class DirectConnectionManagerService {
 				n=rs.getInt(1);
 			}else
 				n=0;
+			n = n + globalProxyId;
 			friendCollectionFactory = new AtomicInteger(n);
 			println "set friendCollectionFactory id: "+n;
 		}catch(SQLException e){
@@ -94,6 +113,7 @@ class DirectConnectionManagerService {
 				n = rs.getInt(1);
 			}else
 				n = 0;
+			n = n + globalProxyId;
 			iFollowCollectionFactory = new AtomicInteger(n);
 			println "set iFollowCollectionFactory id: " + n;
 			
@@ -110,6 +130,7 @@ class DirectConnectionManagerService {
 				n = rs.getInt(1);
 			}else
 				n = 0;
+			n = n + globalProxyId;
 			statusUpdateFactory = new AtomicInteger(n);
 			println "set statusUpdateFactory id: " + n;
 			
@@ -125,6 +146,7 @@ class DirectConnectionManagerService {
 				n = rs.getInt(1);
 			}else
 				n = 0;
+			n = n + globalProxyId;
 			eventBaseFactory = new AtomicInteger(n);
 			println "set eventBaseFactory id: " + n;
 			

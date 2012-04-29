@@ -118,7 +118,7 @@ class UserGroupService
 	
 	public List<Activity> getRecentActivitiesForGroup( final UserGroup group, final int maxCount )
 	{
-		println "getRecentActivitiesForGroup: ${group.id} - ${maxCount}";
+		//println "getRecentActivitiesForGroup: ${group.id} - ${maxCount}";
 			
 		List<Activity> recentActivities = new ArrayList<Activity>();
 		
@@ -126,7 +126,7 @@ class UserGroupService
 		cal.add(Calendar.HOUR_OF_DAY, -600 );
 		Date cutoffDate = cal.getTime();
 		
-		println "Using ${cutoffDate} as cutoffDate";
+		//println "Using ${cutoffDate} as cutoffDate";
 
 		
 		List<Activity> queryResults =
@@ -135,7 +135,7 @@ class UserGroupService
 
 		if( queryResults )
 		{
-			println "adding ${queryResults.size()} activities read from DB";
+			//println "adding ${queryResults.size()} activities read from DB";
 			recentActivities.addAll( queryResults );	
 		}
 		

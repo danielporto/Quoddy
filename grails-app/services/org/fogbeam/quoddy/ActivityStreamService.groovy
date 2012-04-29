@@ -38,7 +38,7 @@ class ActivityStreamService {
 	
 	public List<Activity> getRecentActivitiesForUser( final User user, final int maxCount )
 	{
-		println "getRecentActivitiesForUser: ${user.userId} - ${maxCount}";
+		//println "getRecentActivitiesForUser: ${user.userId} - ${maxCount}";
 		/*
 		 
 		 so what do we do here?  Ok... we receive a request for up to maxCount recent activities.
@@ -75,7 +75,7 @@ class ActivityStreamService {
 		*/
 		
 		int msgsOnQueue = eventQueueService.getQueueSizeForUser( user.userId );
-		println "Messages available on queue: ${msgsOnQueue}";
+		//println "Messages available on queue: ${msgsOnQueue}";
 		int msgsToRead = 0;
 		if( msgsOnQueue > 0 )
 		{
@@ -89,7 +89,7 @@ class ActivityStreamService {
 			}
 		}
 		
-		println "Messages to read from queue: ${msgsToRead}";
+		//println "Messages to read from queue: ${msgsToRead}";
 		
 		// long oldestOriginTime = Long.MAX_VALUE;
 		long oldestOriginTime = new Date().getTime();
@@ -100,7 +100,7 @@ class ActivityStreamService {
 		List<Map> messages = eventQueueService.getMessagesForUser( user.userId, msgsToRead );
 		for( Map msg : messages )
 		{
-			println "msg.originTime: ${msg.originTime}";
+			//println "msg.originTime: ${msg.originTime}";
 			if( msg.originTime < oldestOriginTime )
 			{
 				oldestOriginTime = msg.originTime;
@@ -122,7 +122,7 @@ class ActivityStreamService {
 		for( int i = 0; i < messages.size(); i++ )
 		{
 			Map msg = messages.get(i);
-			println "got message: ${msg} off of queue";
+			//println "got message: ${msg} off of queue";
 			Activity activity = new Activity();
 			
 			// println "msg class: " + msg?.getClass().getName();
@@ -145,7 +145,7 @@ class ActivityStreamService {
 		if( maxCount > msgsToRead ) 
 		{
 			int recordsToRetrieve = maxCount - msgsToRead;
-			println "retrieving up to ${recordsToRetrieve} records from the database";
+			//println "retrieving up to ${recordsToRetrieve} records from the database";
 			
 			// NOTE: get up to recordsToRetrieve records, but don't retrieve anything that
 			// would already be in our working set.
@@ -168,7 +168,8 @@ class ActivityStreamService {
 			boolean friends_added = false; 
 			if( friends != null && friends.size() >= 0 ) 
 			{
-				println "Found ${friends.size()} friends";
+				//println "Found ${friends.size()} friends";
+				long startTime = System.nanoTime();
 				List<Integer> friendIds = new ArrayList<Integer>();
 				for( User friend: friends )
 				{
@@ -194,6 +195,7 @@ class ActivityStreamService {
 				// own feed)
 				friendIds.add( user.id );
 
+				//System.out.println("feeding friends id " + (System.nanoTime() - startTime)*0.000001 + " ms");
 				//ShareTarget streamPublic = ShareTarget.findByName( ShareTarget.STREAM_PUBLIC );
 				Connection conn = DirectConnectionManagerService.getConnection();
 				String sql = "select	id , version,	name, uuid from share_target where	name='"+ShareTarget.STREAM_PUBLIC +"'"; 
@@ -219,6 +221,7 @@ class ActivityStreamService {
 //						 'targetUuid':streamPublic.uuid], 
 //					    ['max': recordsToRetrieve ]);
 				  
+				startTime = System.nanoTime();
 				sql = "select \
 					eventbase0_.id ,\
 					eventbase0_.date_created ,\
@@ -288,25 +291,29 @@ class ActivityStreamService {
 					stmt = conn.prepareStatement(sql);
 					try{
 						rs = stmt.executeQuery();
-						List<EventBase> queryResults= new ArrayList<EventBase>();
+						//System.out.println("=====> get recent activity sql query in " + (System.nanoTime()-startTime)*0.000001 + " ms");
+						startTime = System.nanoTime();
 						while(rs.next()){
 							//queryResults.add(new EventBase(owner:rs.getInt("eventbase0_.owner_id"), dateCreated:rs.getDate("eventbase0_.date_created"), effectiveDate:rs.getDate("eventbase0_.effective_date"), name:rs.getString("eventbase0_.name"), targetUuid:rs.getString("eventbase0_.target_uuid")));
 							User owner1 = friendsTable.get(rs.getInt("eventbase0_.owner_id"));
-							queryResults.add(new Activity(id:rs.getInt("eventbase0_.id"),owner:owner1, dateCreated:rs.getDate("eventbase0_.date_created"), effectiveDate:rs.getDate("eventbase0_.effective_date"), name:rs.getString("eventbase0_.name"), targetUuid:rs.getString("eventbase0_.target_uuid"),
+							/*recentActivities.add(new Activity(id:rs.getInt("eventbase0_.id"),owner:owner1, dateCreated:rs.getDate("eventbase0_.date_created"), effectiveDate:rs.getDate("eventbase0_.effective_date"), name:rs.getString("eventbase0_.name"), targetUuid:rs.getString("eventbase0_.target_uuid"),
 								content:rs.getString("eventbase0_1_.actor_content"),published:rs.getDate("eventbase0_1_.published"), title:rs.getString("eventbase0_1_.title"),updated:rs.getDate("eventbase0_1_.updated"),url:rs.getString("eventbase0_1_.url"),verb:rs.getString("eventbase0_1_.verb"),
 								icon:rs.getString("eventbase0_1_.icon"),uuid:rs.getString("eventbase0_1_.uuid"),actorUuid:rs.getString("eventbase0_1_.actor_uuid"),	actorUrl:rs.getString("eventbase0_1_.actor_url"),actorContent:rs.getString("eventbase0_1_.actor_content"),actorDisplayName:rs.getString("eventbase0_1_.actor_display_name"),
 								actorObjectType:rs.getString("eventbase0_1_.actor_object_type"),actorImageUrl:rs.getString("eventbase0_1_.object_image_url"),actorImageHeight:rs.getString("eventbase0_1_.actor_image_height"),actorImageWidth:rs.getString("eventbase0_1_.actor_image_width"),objectUuid:rs.getString("eventbase0_1_.object_uuid"),
 								objectUrl:rs.getString("eventbase0_1_.object_url"),objectContent:rs.getString("eventbase0_1_.object_content"),objectDisplayName:rs.getString("eventbase0_1_.object_display_name"),objectObjectType:rs.getString("eventbase0_1_.object_object_type"),objectImageUrl:rs.getString("eventbase0_1_.object_image_url"),
 								objectImageHeight:rs.getString("eventbase0_1_.object_image_height"),objectImageWidth:rs.getString("eventbase0_1_.object_image_width"),targetUrl:rs.getString("eventbase0_1_.target_url"),targetContent:rs.getString("eventbase0_1_.target_content"),targetDisplayName:rs.getString("eventbase0_1_.target_display_name"),
-								targetObjectType:rs.getString("eventbase0_1_.target_object_type"),targetImageUrl:rs.getString("eventbase0_1_.target_image_url"),targetImageHeight:rs.getString("eventbase0_1_.target_image_height"),targetImageWidth:rs.getString("eventbase0_1_.target_image_width"),generatorUrl:rs.getString("eventbase0_1_.generator_url"),providerUrl:rs.getString("eventbase0_1_.provider_url")));
+								targetObjectType:rs.getString("eventbase0_1_.target_object_type"),targetImageUrl:rs.getString("eventbase0_1_.target_image_url"),targetImageHeight:rs.getString("eventbase0_1_.target_image_height"),targetImageWidth:rs.getString("eventbase0_1_.target_image_width"),generatorUrl:rs.getString("eventbase0_1_.generator_url"),providerUrl:rs.getString("eventbase0_1_.provider_url")));*/
+							//recentActivities.add(new Activity(id:rs.getInt("eventbase0_.id"),owner:owner1, dateCreated:rs.getDate("eventbase0_.date_created"), effectiveDate:rs.getDate("eventbase0_.effective_date")));
+							recentActivities.add(new Activity(id:rs.getInt(1),owner:owner1, dateCreated:rs.getDate(2), effectiveDate:rs.getDate(3)));
 							}
-						println "adding ${queryResults.size()} activities read from DB";
-						recentActivities.addAll( queryResults );
+						//System.out.println("=====> get recent activity result in " + (System.nanoTime()-startTime)*0.000001 + " ms");
+						//println "adding ${queryResults.size()} activities read from DB";
 					}catch(SQLException e){
 						e.printStackTrace();
 					}
 					stmt.close();
 					rs.close();
+					
 					//println " query "+ sql;		
 					conn.commit();
 					DirectConnectionManagerService.returnConnection(conn);
@@ -322,7 +329,7 @@ class ActivityStreamService {
 			println "Reading NO messages from DB";	
 		}
 		
-		println "recentActivities.size() = ${recentActivities.size()}";
+		//println "recentActivities.size() = ${recentActivities.size()}";
 		return recentActivities;
 	}	
 }
