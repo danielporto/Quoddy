@@ -13,7 +13,7 @@ class StatusController {
 	def jmsService;
 	
 	def updateStatus = {
-		println "UPDATE STATUS ===============================================================================begin"
+		//println "UPDATE STATUS ===============================================================================begin"
 		User user = null;
 		if( !session.user )
 		{
@@ -27,29 +27,26 @@ class StatusController {
 			// get our user
 			user = userService.findUserByUserId( session.user.userId, conn);
 			
-			println "constructing our new StatusUpdate object...";
+			//println "constructing our new StatusUpdate object...";
 			// construct a status object
-			println "statusText: ${params.statusText}";
+			//println "statusText: ${params.statusText}";
 			StatusUpdate newStatus = new StatusUpdate( text: params.statusText, creator: user );
 
 			// put the old "currentStatus" in the oldStatusUpdates collection
 			// addToComments
 			if( user.currentStatus != null )
 			{
-				println "current status is not null"
+				//println "current status is not null"
 				StatusUpdate previousStatus = user.currentStatus;
 				// TODO: do we need to detach this or something?
 				user.addToOldStatusUpdates( previousStatus );
 
 			}
-			else{
-				println "current status is not null"
-				}
 			
 			newStatus.id=DirectConnectionManagerService.getStatusUpdateAndIncrement();
-			println "id got from the factory:"+newStatus.id
+			//println "id got from the factory:"+newStatus.id
 			// set the current status
-			println "setting currentStatus";
+			//println "setting currentStatus";
 			
 //			user.currentStatus = newStatus;
 //			if( !user.save() )
@@ -148,14 +145,14 @@ class StatusController {
 			msg.originTime = activity.dateCreated.time;
 			
 			
-			println "sending message to JMS";
+			//println "sending message to JMS";
 			jmsService.send( queue: 'uitestActivityQueue', msg, 'standard', null );
 			
 		}
 		
-		println "redirecting to home:index";
+		//println "redirecting to home:index";
 		redirect( controller:"home", action:"index", params:[userId:user.userId]);
-		println "UPDATE STATUS ===============================================================================end"
+		//println "UPDATE STATUS ===============================================================================end"
 	}
 
 	def listUpdates =
@@ -208,7 +205,7 @@ class StatusController {
 			stmt.close();
 			rs.close();
 			
-			println "sorting the list"
+			//println "sorting the list"
 			if(updates.size>0)
 				updates = updates.sort{ it.dateCreated }.reverse();
 			conn.commit();

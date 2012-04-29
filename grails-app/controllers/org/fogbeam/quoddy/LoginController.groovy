@@ -39,9 +39,9 @@ class LoginController {
 		// credentials in advance, drive the user through any multi-step stuff
 		// then submit the credentials.
 
-		long startTime = System.nanoTime();
+		//long startTime = System.nanoTime();
 		user = loginService.doUserLogin( userId, password );
-		System.out.println("=====> login with user " + user.userId + " in " + (System.nanoTime()-startTime)*0.000001 + " ms");
+		//System.out.println("=====> login with user " + user.userId + " in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 		if( user )
 		{
     		session.user = user;

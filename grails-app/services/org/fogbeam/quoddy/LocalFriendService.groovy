@@ -9,12 +9,12 @@ import org.fogbeam.quoddy.DirectConnectionManagerService;
 class LocalFriendService 
 {
 	def directConnectionManagerService; 
-	
 	//added
 	public static FriendCollection findFriendCollectionByOwnerUuid( final String uuid, Connection conn )
 	{
 		//String sql = "select id, version, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+uuid+"'";
 		FriendCollection friendsCollection = null;
+		//long startTime = System.nanoTime();
 		String sql = "select id, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+uuid+"'";
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		ResultSet rs = null;
@@ -34,6 +34,8 @@ class LocalFriendService
 		stmt.close();
 		rs.close();
 		
+		//long endTime = System.nanoTime();
+		//System.out.println("get friend collection in " + (endTime - startTime)*0.000001 + " ms");
 
 		friendsCollection.friends= new HashSet<String>();
 		sql="select friend_collection_id , friends_string from friend_collection_friends where friend_collection_id="+friendsCollection.id;
@@ -48,6 +50,7 @@ class LocalFriendService
 		}
 		stmt.close();
 		rs.close();
+		//System.out.println("get all friends string in " + (System.nanoTime()-endTime)*0.000001 + " ms");
 		return 	friendsCollection;
 	}
 
@@ -267,7 +270,7 @@ class LocalFriendService
 	
 	public void addToFriends( final User currentUser, final User newFriend )
 	{
-		println "UserService.addTofriends: ${currentUser.userId} / ${newFriend.userId}";
+		//println "UserService.addTofriends: ${currentUser.userId} / ${newFriend.userId}";
 		
 		//FriendRequestCollection friendRequests = FriendRequestCollection.findByOwnerUuid( newFriend.uuid );
 		FriendRequestCollection friendRequests = null;
@@ -333,6 +336,7 @@ class LocalFriendService
 		// select ownerUuid from IFollowCollection where iFollow contains user.uuid 
 		// from Item item join item.labels lbls where 'hello' in (lbls)
 		Connection conn = DirectConnectionManagerService.getConnection();
+		//long startTime = System.nanoTime();
 		
 //		String sql = "select id,version,date_created,owner_uuid from ifollow_collection inner join ifollow_collection_i_follow ifollow1_ on id=ifollow1_.ifollow_collection_id"+ 
 //				" where '"+user.uuid+"' in (ifollow1_.i_follow_string)";
@@ -367,6 +371,7 @@ class LocalFriendService
 		}
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
+		//System.out.println("get my followers in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 		return followers;
 	}
 	
@@ -376,7 +381,7 @@ class LocalFriendService
 		List<User> peopleIFollow = new ArrayList<User>();
 //		directConnectionManagerService = new DirectConnectionManagerService();
 //		def conn = directConnectionManagerService.getConnection();
-		
+		//long startTime = System.nanoTime();
 		Connection conn = DirectConnectionManagerService.getConnection();
 		//first get ifollow_collection_id
 		
@@ -429,14 +434,15 @@ class LocalFriendService
 		
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
-				
+		
+		//System.out.println("get i follow in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 		return peopleIFollow;
 	}
 	
 	public List<FriendRequest> listOpenFriendRequests( final User user )
 	{
 		List<FriendRequest> openFriendRequests = new ArrayList<FriendRequest>();
-		
+		//long startTime = System.nanoTime();
 		Connection conn = DirectConnectionManagerService.getConnection();
 		//FriendRequestCollection friendRequestCollection = FriendRequestCollection.findByOwnerUuid( user.uuid );
 		FriendRequestCollection friendRequestCollection = this.findFriendRequestCollectionByOwnerUuid( user.uuid, conn);
@@ -453,6 +459,7 @@ class LocalFriendService
 		}
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
+		//System.out.println("get open friend requests in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 		return openFriendRequests;		
 	}
 

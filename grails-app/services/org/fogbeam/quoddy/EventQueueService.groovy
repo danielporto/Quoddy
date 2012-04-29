@@ -135,12 +135,12 @@ class EventQueueService
 	
 	public List<Map> getMessagesForUser( final String userId, final int msgCount )
 	{
-		println "getting messages for user: ${userId}, msgCount: ${msgCount}";
+		//println "getting messages for user: ${userId}, msgCount: ${msgCount}";
 		List<Map> messages = new ArrayList<Map>();
 		Deque<Map> userQueue = eventQueues.get( userId );
 		if( userQueue != null )
 		{
-			println "got userQueue for user ${userId}";
+			//println "got userQueue for user ${userId}";
 			for( int i = 0; i < msgCount; i++ )
 			{
 				// get message from queue, put it in return set	
@@ -155,7 +155,7 @@ class EventQueueService
 	
 	public void registerEventQueueForUser( final String userId )
 	{
-		println "registering eventqueue for user: ${userId}";
+		//println "registering eventqueue for user: ${userId}";
 		
 		if( !eventQueues.containsKey( userId ))
 		{

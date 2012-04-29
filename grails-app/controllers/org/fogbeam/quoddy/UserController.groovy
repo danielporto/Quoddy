@@ -153,7 +153,7 @@ class UserController {
 		}
 		else
 		{
-			println "follow: ${params.userId}";
+			//println "follow: ${params.userId}";
 		
 			currentUser = userService.findUserByUserId( session.user.userId );
 			
@@ -177,7 +177,7 @@ class UserController {
 		}
 		else
 		{
-			println "addToFriends: ${params.userId}";
+			//println "addToFriends: ${params.userId}";
 		
 			currentUser = userService.findUserByUserId( session.user.userId );
 			
@@ -192,7 +192,7 @@ class UserController {
 
 	def confirmFriend = 
 	{
-		println "confirmFriend";
+		//println "confirmFriend";
 		User currentUser = null;
 		if( !session.user )
 		{

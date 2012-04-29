@@ -18,7 +18,9 @@
 --
 -- Table structure for table `activity`
 --
-
+DROP DATABASE IF EXISTS quoddy2;
+CREATE DATABASE quoddy2;
+connect quoddy2;
 
 DROP TABLE IF EXISTS `activity`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -35,7 +37,7 @@ CREATE TABLE `activity` (
   `actor_uuid` varchar(255) DEFAULT NULL,
   `content` varchar(255) NOT NULL,
   `generator_url` varchar(255) DEFAULT NULL,
-  `icon` tinyblob,
+  `icon` varchar(255),
   `object_content` varchar(255) DEFAULT NULL,
   `object_display_name` varchar(255) DEFAULT NULL,
   `object_image_height` varchar(255) DEFAULT NULL,
@@ -55,7 +57,7 @@ CREATE TABLE `activity` (
   `target_url` varchar(255) DEFAULT NULL,
   `title` varchar(255) NOT NULL,
   `updated` datetime DEFAULT NULL,
-  `url` tinyblob NOT NULL,
+  `url` varchar(255) NOT NULL,
   `uuid` varchar(255) NOT NULL,
   `verb` varchar(255) NOT NULL,
   
@@ -86,7 +88,7 @@ DROP TABLE IF EXISTS `calendar_event`;
 CREATE TABLE `calendar_event` (
   `id` bigint(20) NOT NULL,
   `date_event_created` datetime NOT NULL,
-  `description` longtext,
+  `description` varchar(1000),
   `end_date` datetime DEFAULT NULL,
   `geo_lat` float NOT NULL,
   `geo_long` float NOT NULL,
@@ -237,7 +239,9 @@ CREATE TABLE `event_base` (
   `_SP_clock` varchar(100) default "0-0",
 
   PRIMARY KEY (`id`),
-  KEY `FK3AA3DD56D1B1E9A7` (`owner_id`)
+  KEY `FK3AA3DD56D1B1E9A7` (`owner_id`),
+  KEY `eventTargetUuid` (`target_uuid`),
+  KEY `effectDate` (`effective_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -329,7 +333,8 @@ CREATE TABLE `friend_collection` (
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY (`owner_uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -385,7 +390,8 @@ CREATE TABLE `friend_request_collection` (
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `friendrequestuuid` (`owner_uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -411,7 +417,8 @@ CREATE TABLE `friend_request_collection_friend_requests` (
   `_SP_del` bool default false, 
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
-  KEY `FK85236D95D7D78385` (`friend_request_collection_id`)
+  KEY `FK85236D95D7D78385` (`friend_request_collection_id`),
+  KEY `friendrequestStr` (`friend_requests_string`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -475,7 +482,8 @@ CREATE TABLE `ifollow_collection` (
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `ifollowuuid` (`owner_uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -501,7 +509,8 @@ CREATE TABLE `ifollow_collection_i_follow` (
   `_SP_del` bool default false, 
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
-  KEY `FKCBB19A6372B54A5A` (`ifollow_collection_id`)
+  KEY `FKCBB19A6372B54A5A` (`ifollow_collection_id`),
+  KEY `ifollowstring` (`i_follow_string`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -587,7 +596,8 @@ CREATE TABLE `local_account` (
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `lcusername` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1009,7 +1019,8 @@ CREATE TABLE `share_target` (
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `shareuuid` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1288,7 +1299,8 @@ CREATE TABLE `uzer` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`),
   KEY `FK370612AC44CB52` (`current_status_id`),
-  KEY `FK370612A2139300` (`profile_id`)
+  KEY `FK370612A2139300` (`profile_id`),
+  KEY `useruuid` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1311,3 +1323,24 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2012-04-25  6:17:51
+
+use quoddy2;
+DELIMITER //
+CREATE PROCEDURE preload()
+BEGIN
+SELECT actor_content FROM activity WHERE actor_content IS NOT NULL;
+SELECT date_created FROM event_base WHERE date_created IS NOT NULL;
+SELECT date_created FROM friend_collection WHERE date_created IS NOT NULL;
+SELECT friends_string FROM friend_collection_friends WHERE friends_string IS NOT NULL;
+SELECT date_created FROM friend_request_collection WHERE date_created IS NOT NULL;
+SELECT friend_requests_string FROM friend_request_collection_friend_requests WHERE friend_requests_string IS NOT NULL;
+SELECT date_created FROM ifollow_collection WHERE date_created IS NOT NULL;
+SELECT ifollow_collection_id FROM ifollow_collection_i_follow WHERE ifollow_collection_id IS NOT NULL;
+SELECT password FROM local_account WHERE password IS NOT NULL;
+SELECT name FROM share_target WHERE name IS NOT NULL;
+SELECT creator_id FROM status_update WHERE creator_id IS NOT NULL;
+SELECT date_created FROM user_stream WHERE date_created IS NOT NULL;
+SELECT current_status_id FROM uzer WHERE current_status_id IS NOT NULL;
+END //
+DELIMITER ;
+
