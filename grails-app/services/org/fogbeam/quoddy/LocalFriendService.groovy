@@ -156,14 +156,13 @@ class LocalFriendService
 		stmt.close();
 		//set shadow operation
 		try{
-			System.out.println("Set shadow op for add to follow");
+			//System.out.println("Set shadow op for add to follow");
 			DBQUODDYShdAddToFollow dATF = DBQUODDYShdAddToFollow.createOperation(iFollowCollection.dateCreated.toString(),destinationUser.uuid,(int)iFollowCollection.id,targetUser.uuid);
 			conn.setShadowOperation(dATF, 0);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		conn.commit();
-		DirectConnectionManagerService.returnConnection(conn);
+		DirectConnectionManagerService.commitAndReturn(conn);
 	}
 
 	/* note: this is a "two way" operation, so to speak.  That is, the initial
@@ -272,15 +271,14 @@ class LocalFriendService
 		//set shadow operation
 		
 		try{
-			System.out.println("Set shadow op for confirm friend");
+			//System.out.println("Set shadow op for confirm friend");
 			DBQUODDYShdConfirmFriend dCF = DBQUODDYShdConfirmFriend.createOperation(now.toString(), friendCollectionCU.ownerUuid,(int)friendCollectionCU.id,
 				friendCollectionNF.ownerUuid,(int)friendCollectionNF.id,friendRequestsCU.ownerUuid,(int)friendRequestsCU.id,newFriend.uuid);
 			conn.setShadowOperation(dCF, 0);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		conn.commit();
-		DirectConnectionManagerService.returnConnection(conn);
+		DirectConnectionManagerService.commitAndReturn(conn);
 //		friendCollectionCU.addToFriends( newFriend.uuid );
 //		friendCollectionNF.addToFriends( currentUser.uuid );
 //		friendRequestsCU.save();
@@ -317,7 +315,7 @@ class LocalFriendService
 				stmt1.close();
 				//set shadow operation
 				try{
-					System.out.println("Set really shadow op for add to Friend");
+					//System.out.println("Set really shadow op for add to Friend");
 					DBQUODDYShdAddToFriend dATF = DBQUODDYShdAddToFriend.createOperation(newFriendId,newFriend.uuid, createDate.toString(), currentUser.uuid);
 					conn.setShadowOperation(dATF, 0);
 				} catch (IOException e) {
@@ -326,7 +324,7 @@ class LocalFriendService
 			}else{
 				//set empty shadow operation
 				try{
-					System.out.println("Set empty shadow op for add to Friend");
+					//System.out.println("Set empty shadow op for add to Friend");
 					DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 					conn.setShadowOperation(dEm, 0);
 				} catch (IOException e) {
@@ -338,8 +336,7 @@ class LocalFriendService
 		}
 		stmt.close();
 		rs.close();
-		conn.commit();
-		DirectConnectionManagerService.returnConnection(conn);
+		DirectConnectionManagerService.commitAndReturn(conn);
 		
 //		if( friendRequests == null )
 //		{
@@ -420,8 +417,7 @@ class LocalFriendService
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		conn.commit();
-		DirectConnectionManagerService.returnConnection(conn);
+		DirectConnectionManagerService.commitAndReturn(conn);
 		//System.out.println("get my followers in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 		return followers;
 	}
@@ -485,14 +481,13 @@ class LocalFriendService
 		
 		//set shadow operation
 		try{
-			System.out.println("Set empty shadow op for list iFollow");
+			//System.out.println("Set empty shadow op for list iFollow");
 			DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 			conn.setShadowOperation(dEm, 0);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		conn.commit();
-		DirectConnectionManagerService.returnConnection(conn);
+		DirectConnectionManagerService.commitAndReturn(conn);
 		//System.out.println("get i follow in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 		return peopleIFollow;
 	}
@@ -524,8 +519,7 @@ class LocalFriendService
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		conn.commit();
-		DirectConnectionManagerService.returnConnection(conn);
+		DirectConnectionManagerService.commitAndReturn(conn);
 		//System.out.println("get open friend requests in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 		return openFriendRequests;		
 	}

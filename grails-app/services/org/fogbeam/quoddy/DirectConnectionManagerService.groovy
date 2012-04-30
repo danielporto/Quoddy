@@ -37,14 +37,43 @@ class DirectConnectionManagerService {
 	static int proxyId;
 	static int totalproxies;
 	static int globalProxyId;
+	static int dcCount;
+	static String fileName = "/var/tmp/proxy.txt";
 	
 	static void setParameters(){
 		//read from a file, then dcId and proxyId be set
-		dcId = 0;
-		proxyId = 0;
+		try{
+			// Open the file that is the first
+			// command line parameter
+			FileInputStream fstream = new FileInputStream(fileName);
+			// Get the object of DataInputStream
+			DataInputStream inputStr = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(inputStr));
+			String strLine = br.readLine();
+			if(strLine == null){
+				System.out.println("Could not find my id file");
+				System.exit(-1);
+			}
+			String[] tmp = strLine.split(" ");
+			dcId = Integer.parseInt(tmp[1])
+			proxyId = Integer.parseInt(tmp[3]);
+			totalproxies = Integer.parseInt(tmp[5]);
+			dcCount = Integer.parseInt(tmp[7]);
+			//Close the input stream
+			inputStr.close();
+		}catch (Exception e){//Catch exception if any
+			System.err.println("Error: " + e.getMessage());
+		}
+	}
+	
+	static void configuration(){
+		setParameters();
+		proxy = new QUODDY_TxMud_Proxy(dcId, proxyId, 10, "quoddy_txmud.xml", dcCount, 0, "quoddy_txmud_db.xml", 10);
 		globalProxyId = proxy.getMyGlobalProxyId();
-		totalproxies = 1;
 		delta = totalproxies;
+		System.out.println("I am dcId " + dcId + " proxyId " + proxyId + " totaldc " + dcCount + " totalproxy " +totalproxies +" my global id " + globalProxyId);
+		initDatabasePool();
+		init();
 	}
 	
 	static TxMudConnection createConnection(){
@@ -169,9 +198,16 @@ class DirectConnectionManagerService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		conn.commit();
-		returnConnection(conn);
+		commitAndReturn(conn);
 	
+	}
+	
+	static void commitAndReturn(TxMudConnection conn){
+		try{
+			conn.commit();
+		}catch(SQLException e){
+		}
+		returnConnection(conn);
 	}
 	
 	

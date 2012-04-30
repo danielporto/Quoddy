@@ -38,8 +38,7 @@ class UserStreamService
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			conn.commit();
-			DirectConnectionManagerService.returnConnection(conn);
+			DirectConnectionManagerService.commitAndReturn(conn);
 		}
 		
 		// select activity from Activity as activity where
@@ -101,8 +100,7 @@ class UserStreamService
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			conn.commit();
-			DirectConnectionManagerService.returnConnection(conn);
+			DirectConnectionManagerService.commitAndReturn(conn);
 		}
 		
 //		List<UserStream> tempStreams = UserStream.executeQuery( "select stream from UserStream as stream where stream.owner = :owner and stream.definedBy = :definedBy", 

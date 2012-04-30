@@ -64,14 +64,13 @@ class EventQueueService
 			if( ! msg.targetUuid.equals( streamPublic.uuid ))
 			{
 				try{
-					System.out.println("Set empty shadow op for onMessage 1");
+					//System.out.println("Set empty shadow op for onMessage 1");
 					DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 					conn.setShadowOperation(dEm, 0);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				conn.commit();
-				DirectConnectionManagerService.returnConnection(conn);
+				DirectConnectionManagerService.commitAndReturn(conn);
 				return;
 			}
 			
@@ -124,14 +123,13 @@ class EventQueueService
 		}
 		if(conn != null){
 			try{
-				System.out.println("Set empty shadow op for onMessage 2");
+				//System.out.println("Set empty shadow op for onMessage 2");
 				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 				conn.setShadowOperation(dEm, 0);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			conn.commit();
-			DirectConnectionManagerService.returnConnection(conn);
+			DirectConnectionManagerService.commitAndReturn(conn);
 		}
 		//println "done processing eventQueue instances";
 	}

@@ -12,9 +12,10 @@ class BootStrap {
 	def directConnectionManagerService;
 	def init = { servletContext ->
      
-		directConnectionManagerService.proxy = new QUODDY_TxMud_Proxy(0, 0, 10, "quoddy_txmud.xml", 1, 0, "quoddy_txmud_db.xml", 10);
-		directConnectionManagerService.initDatabasePool();
-		directConnectionManagerService.init();
+//		directConnectionManagerService.proxy = new QUODDY_TxMud_Proxy(0, 0, 10, "quoddy_txmud.xml", 1, 0, "quoddy_txmud_db.xml", 10);
+//		directConnectionManagerService.initDatabasePool();
+//		directConnectionManagerService.init();
+		directConnectionManagerService.configuration();
 		
 		 switch( Environment.current )
 	     {

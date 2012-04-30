@@ -144,8 +144,7 @@ class StatusController {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			conn.commit();
-			DirectConnectionManagerService.returnConnection(conn);
+			DirectConnectionManagerService.commitAndReturn(conn)
 			//=======
 			
 			Map msg = new HashMap();
@@ -226,8 +225,7 @@ class StatusController {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			conn.commit();
-			DirectConnectionManagerService.returnConnection(conn);
+			DirectConnectionManagerService.commitAndReturn(conn);
 		}
 		//println "now is going to do something wird"
 		[updates:updates]

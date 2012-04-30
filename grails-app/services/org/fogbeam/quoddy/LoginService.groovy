@@ -87,8 +87,7 @@ class LoginService
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		conn.commit();
-		DirectConnectionManagerService.returnConnection(conn);
+		DirectConnectionManagerService.commitAndReturn(conn);
 		return user;	
 	}	
 

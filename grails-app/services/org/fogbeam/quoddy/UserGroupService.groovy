@@ -112,8 +112,7 @@ class UserGroupService
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			conn.commit();
-			DirectConnectionManagerService.returnConnection(conn);
+			DirectConnectionManagerService.commitAndReturn(conn);
 		}
 		
 //		List<UserGroup> tempGroups = UserGroup.executeQuery( "select ugroup from UserGroup as ugroup, User as user where user = ? and ( ugroup.owner = user OR user in elements (ugroup.groupMembers))", [user] );

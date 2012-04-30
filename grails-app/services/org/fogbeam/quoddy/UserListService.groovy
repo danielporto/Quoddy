@@ -41,8 +41,7 @@ class UserListService
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			conn.commit();
-			DirectConnectionManagerService.returnConnection(conn);
+			DirectConnectionManagerService.commitAndReturn(conn);
 		}
 //		List<UserList> tempLists = UserList.executeQuery( "select list from UserList as list where list.owner = :owner",
 //														  ['owner':user] );

@@ -72,8 +72,7 @@ class UserService {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			conn.commit();
-			DirectConnectionManagerService.returnConnection(conn);
+			DirectConnectionManagerService.commitAndReturn(conn);
 		}
 		
 		return user;
@@ -262,8 +261,7 @@ class UserService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		conn.commit();
-		DirectConnectionManagerService.returnConnection(conn);
+		DirectConnectionManagerService.commitAndReturn(conn);
 		//System.out.println("get all users in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 //		List<User> temp = User.findAll();
 //		if( temp )
@@ -300,8 +298,7 @@ class UserService {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			conn.commit();
-			DirectConnectionManagerService.returnConnection(conn);
+			DirectConnectionManagerService.commitAndReturn(conn);
 		}
 		return friends;	
 	}

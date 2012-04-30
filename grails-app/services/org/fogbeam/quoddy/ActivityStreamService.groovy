@@ -141,9 +141,9 @@ class ActivityStreamService {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			conn1.commit();
-		}
-		DirectConnectionManagerService.returnConnection(conn1);
+			DirectConnectionManagerService.commitAndReturn(conn1);
+		}else
+			DirectConnectionManagerService.returnConnection(conn1);
 //		println "recentActivities.size() = ${recentActivities.size()}"
 		
 		/* NOTE: here, we need to make sure we don't retrieve anything NEWER than the OLDEST
@@ -338,8 +338,7 @@ class ActivityStreamService {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			conn.commit();
-			DirectConnectionManagerService.returnConnection(conn);
+			DirectConnectionManagerService.commitAndReturn(conn);
 		}
 		else
 		{
