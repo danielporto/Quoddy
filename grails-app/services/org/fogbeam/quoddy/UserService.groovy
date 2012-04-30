@@ -44,7 +44,7 @@ class UserService {
 			conn = DirectConnectionManagerService.getConnection();
 			needToCommit = true;
 		}
-		
+		//long startTime = System.nanoTime();
 		String sql = "select id, current_status_id, date_created, email, first_name, full_name,\
 		last_name,	profile_id,	user_id, uuid from uzer where user_id='"+userId+"'";
 		PreparedStatement stmt = conn.prepareStatement(sql);
@@ -52,10 +52,9 @@ class UserService {
 		try{
 			rs = stmt.executeQuery();
 			if(rs.next()){
-				println "we found a user with userId " + userId;
+				//println "we found a user with userId " + userId;
 				user = new User(uuid:rs.getString("uuid"), userId:rs.getString("user_id"), dateCreated:rs.getDate("date_created"),firstName:rs.getString("first_name"),lastName:rs.getString("last_name"),email:rs.getString("email"));
 				user.id = (long)rs.getInt("id");
-				//println "user id is : " + user.id;
 			}else{
 				println "sorry we didn't find a user with userId " + userId;
 			}
@@ -64,10 +63,10 @@ class UserService {
 		}
 		stmt.close();
 		rs.close();
-		
+		//System.out.println("view a user profile in " +(System.nanoTime()-startTime)*0.000001 + " ms");
 		if(needToCommit){
 			try{
-				System.out.println("Set empty shadow op for findUserByUserId");
+				//System.out.println("Set empty shadow op for findUserByUserId");
 				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 				conn.setShadowOperation(dEm, 0);
 			} catch (IOException e) {
@@ -80,7 +79,42 @@ class UserService {
 		return user;
 	}	
 	
-	public User findUserByUuid( final String uuid, Connection conn )
+	/*
+	 * create a function to fetch user by integer user id
+	 */
+	
+	public User findUserById( final int id, TxMudConnection conn )
+	{
+		//User user = User.findByUuid( uuid );
+//		String sql = "select id ,version,current_status_id, date_created, email, first_name, full_name, last_name, profile_id, user_id, "+
+//		             "uuid from uzer where uuid='"+uuid+"'"
+		User user = null;
+		String sql = "select id, current_status_id, date_created, email, first_name, full_name, last_name, profile_id, user_id, "+
+		"uuid from uzer where id='"+id+"'"
+
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		ResultSet rs = null;
+		try{
+			rs = stmt.executeQuery();
+			if(rs.next()){
+				//println "we find a user with " + uuid;
+				user = new User(uuid:rs.getString("uuid"), userId:rs.getString("user_id"), dateCreated:rs.getDate("date_created"),firstName:rs.getString("first_name"),lastName:rs.getString("last_name"),email:rs.getString("email"));
+				user.id = (long)rs.getInt("id");
+			}else{
+				println "sorry we didn't find a user with userId " + uuid;
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
+		}
+		stmt.close();
+		rs.close();
+		
+		return user;
+			
+	}
+	
+	
+	public User findUserByUuid( final String uuid, TxMudConnection conn )
 	{
 		//User user = User.findByUuid( uuid );
 //		String sql = "select id ,version,current_status_id, date_created, email, first_name, full_name, last_name, profile_id, user_id, "+
@@ -94,7 +128,7 @@ class UserService {
 		try{
 			rs = stmt.executeQuery();
 			if(rs.next()){
-				println "we find a user with " + uuid;
+				//println "we find a user with " + uuid;
 				user = new User(uuid:rs.getString("uuid"), userId:rs.getString("user_id"), dateCreated:rs.getDate("date_created"),firstName:rs.getString("first_name"),lastName:rs.getString("last_name"),email:rs.getString("email"));
 				user.id = (long)rs.getInt("id");
 			}else{
@@ -201,6 +235,7 @@ class UserService {
 	{
 		List<User> users = new ArrayList<User>();
 		TxMudConnection conn = DirectConnectionManagerService.getConnection();
+		//long startTime = System.nanoTime();
 		Random diceRoller = new Random();
 		double range = diceRoller.nextDouble();
 		String sql = "select id, version,current_status_id,date_created,email,first_name ,full_name ,last_name ,profile_id,user_id ,uuid  from uzer where id > \
@@ -209,6 +244,7 @@ class UserService {
 		ResultSet rs = null;
 		try{
 			rs = stmt.executeQuery();
+			//System.out.println("get all user query done in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 			while(rs.next()){
 				users.add(new User(uuid:rs.getString("uuid"), userId:rs.getString("user_id"), dateCreated:rs.getDate("date_created"),firstName:rs.getString("first_name"),lastName:rs.getString("last_name"),email:rs.getString("email")));
 			}
@@ -220,7 +256,7 @@ class UserService {
 		//set shadow operation
 		
 		try{
-			System.out.println("Set empty shadow op for find all users");
+			//System.out.println("Set empty shadow op for find all users");
 			DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 			conn.setShadowOperation(dEm, 0);
 		} catch (IOException e) {
@@ -228,6 +264,7 @@ class UserService {
 		}
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
+		//System.out.println("get all users in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 //		List<User> temp = User.findAll();
 //		if( temp )
 //		{
@@ -240,22 +277,24 @@ class UserService {
 	public List<User> listFriends( User user, TxMudConnection conn=null ) 
 	{
 		//getConnection here
+		//System.out.println("list friends ");
+		//long startTime = System.nanoTime();
 		boolean needToCommit = false;
 		if(conn == null){
 			conn = DirectConnectionManagerService.getConnection();
 			needToCommit = true;
 		}
 		
-		List<User> friends = new ArrayList<User>();
-		List<User> temp = friendService.listFriends( user, conn );
-		if( temp )
-		{
-			friends.addAll( temp );
-		}
+		//List<User> friends = new ArrayList<User>();
+		List<User> friends = friendService.listFriends( user, conn );
+//		if( temp )
+//		{
+//			friends.addAll( temp );
+//		}
 		if(needToCommit){
 			//set shadow operation
 			try{
-				System.out.println("Set empty shadow op for list friends");
+				//System.out.println("Set empty shadow op for list friends");
 				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 				conn.setShadowOperation(dEm, 0);
 			} catch (IOException e) {
@@ -269,37 +308,40 @@ class UserService {
 		// ---
 	public List<User> listFollowers( User user )
 	{
-		List<User> followers = new ArrayList<User>();
-		List<User> temp = friendService.listFollowers( user );
-		if( temp )
-		{
-			followers.addAll( temp );
-		}
+		//List<User> followers = new ArrayList<User>();
+		List<User> followers = friendService.listFollowers( user );
+		//List<User> temp = friendService.listFollowers( user );
+//		if( temp )
+//		{
+//			followers.addAll( temp );
+//		}
 	
 		return followers;
 	}
 	
 	public List<User> listIFollow( User user )
 	{
-		List<User> iFollow = new ArrayList<User>();
-		List<User> temp = friendService.listIFollow( user );
-		if( temp )
-		{
-			iFollow.addAll( temp );
-		}
+		List<User> iFollow = friendService.listIFollow( user );
+//		List<User> iFollow = new ArrayList<User>();
+//		List<User> temp = friendService.listIFollow( user );
+//		if( temp )
+//		{
+//			iFollow.addAll( temp );
+//		}
 	
 		return iFollow;
 	}
 	
 	public List<FriendRequest> listOpenFriendRequests( User user )
 	{
-		List<FriendRequest> openRequests = new ArrayList<FriendRequest>();
-		
-		List<FriendRequest> temp = friendService.listOpenFriendRequests( user );
-		if( temp )
-		{
-			openRequests.addAll( temp );	
-		}
+		List<FriendRequest> openRequests = friendService.listOpenFriendRequests( user );
+//		List<FriendRequest> openRequests = new ArrayList<FriendRequest>();
+//		
+//		List<FriendRequest> temp = friendService.listOpenFriendRequests( user );
+//		if( temp )
+//		{
+//			openRequests.addAll( temp );	
+//		}
 		
 		return openRequests;
 	}	

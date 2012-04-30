@@ -32,6 +32,21 @@ class DirectConnectionManagerService {
 	static int delta = 1;
 	public static QUODDY_TxMud_Proxy proxy;
 	
+	//topology file
+	static int dcId;
+	static int proxyId;
+	static int totalproxies;
+	static int globalProxyId;
+	
+	static void setParameters(){
+		//read from a file, then dcId and proxyId be set
+		dcId = 0;
+		proxyId = 0;
+		globalProxyId = proxy.getMyGlobalProxyId();
+		totalproxies = 1;
+		delta = totalproxies;
+	}
+	
 	static TxMudConnection createConnection(){
 		TxMudDriver.proxy = proxy.imp;
 		TxMudConnection con = (TxMudConnection) DriverManager.getConnection(jdbcPath);
@@ -42,12 +57,14 @@ class DirectConnectionManagerService {
 	
 	static synchronized TxMudConnection getConnection(){
 		if(availableConnPool.size()>0){
+			System.out.println("+++++get Connection available pool size: " +(availableConnPool.size()-1));
 			return availableConnPool.pop();
 		}
 		return null;
 	}
 	
 	static synchronized void initDatabasePool(){
+		setParameters();
 		println "initialize database pool with number: "+maxConnPool;
 		int connectionNum = maxConnPool;
 		while(connectionNum > 0){
@@ -58,11 +75,12 @@ class DirectConnectionManagerService {
 	}
 	
 	static synchronized void returnConnection(TxMudConnection conn){
-		System.out.println("available connection pool is " + availableConnPool.size());
 		availableConnPool.push(conn);
+		System.out.println("-----return Connection available connection pool size: " + availableConnPool.size());
 	}
 	
 	static init(){
+		System.err.println("my globalProxyId: " + globalProxyId + " totalproxy " + totalproxies);
 		TxMudConnection conn = getConnection();
 		ResultSet rs = null;
 		Statement stmt = conn.createStatement();
@@ -73,6 +91,7 @@ class DirectConnectionManagerService {
 				n = rs.getInt(1);
 			}else
 				n = 0;
+			n = n + globalProxyId;
 			friendRequestCollectionFactory = new AtomicInteger(n);
 			println "set friend request collection factory id: "+n;
 		}catch(SQLException e){
@@ -85,6 +104,7 @@ class DirectConnectionManagerService {
 				n=rs.getInt(1);
 			}else
 				n=0;
+			n = n + globalProxyId;
 			friendCollectionFactory = new AtomicInteger(n);
 			println "set friendCollectionFactory id: "+n;
 		}catch(SQLException e){
@@ -98,6 +118,7 @@ class DirectConnectionManagerService {
 				n = rs.getInt(1);
 			}else
 				n = 0;
+			n = n + globalProxyId;
 			iFollowCollectionFactory = new AtomicInteger(n);
 			println "set iFollowCollectionFactory id: " + n;
 			
@@ -114,6 +135,7 @@ class DirectConnectionManagerService {
 				n = rs.getInt(1);
 			}else
 				n = 0;
+			n = n + globalProxyId;
 			statusUpdateFactory = new AtomicInteger(n);
 			println "set statusUpdateFactory id: " + n;
 			
@@ -129,6 +151,7 @@ class DirectConnectionManagerService {
 				n = rs.getInt(1);
 			}else
 				n = 0;
+			n = n + globalProxyId;
 			eventBaseFactory = new AtomicInteger(n);
 			println "set eventBaseFactory id: " + n;
 			
@@ -140,7 +163,7 @@ class DirectConnectionManagerService {
 		stmt.close();
 		
 		try{
-			System.out.println("Set empty shadow op for init");
+			//System.out.println("Set empty shadow op for init");
 			DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 			conn.setShadowOperation(dEm, 0);
 		} catch (IOException e) {

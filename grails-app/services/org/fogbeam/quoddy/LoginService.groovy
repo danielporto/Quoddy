@@ -36,10 +36,10 @@ class LoginService
 			trySecondAuthSource = false;  // this is a local user
 			// verify credentials, verify is existing User, load User	
 			String md5HashSubmitted = digestMd5( password );
-			println "md5HashSubmitted: ${md5HashSubmitted}";
+			//println "md5HashSubmitted: ${md5HashSubmitted}";
 			if( md5HashSubmitted.equals( account.password ))
 			{
-				println "login successful";
+				//println "login successful";
 				
 				// now find a User that matches this account
 				user = userService.findUserByUserId( account.username, conn);
@@ -59,10 +59,10 @@ class LoginService
 			{
 				// verify credentials, verify is existing User, load User
 				String md5HashSubmitted = digestMd5( password );
-				println "md5HashSubmitted: ${md5HashSubmitted}";
+				//println "md5HashSubmitted: ${md5HashSubmitted}";
 				if( md5HashSubmitted.equals( person.userpassword ))
 				{
-					println "login successful";
+					//println "login successful";
 					
 					// now find a User that matches this account
 					user = userService.findUserByUserId( person.uid );
@@ -78,10 +78,10 @@ class LoginService
 			}
 			
 		}
-		println "commit in the login ";
+		//println "commit in the login ";
 		//set shadow operation
 		try{
-			System.out.println("Set empty shadow op for login");
+			//System.out.println("Set empty shadow op for login");
 			DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 			conn.setShadowOperation(dEm, 0);
 		} catch (IOException e) {

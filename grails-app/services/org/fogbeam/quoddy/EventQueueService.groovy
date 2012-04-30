@@ -17,20 +17,20 @@ class EventQueueService
 	
 	def onMessage(msg)
 	{
-		println "Received message from JMS: ${msg}";
+		//println "Received message from JMS: ${msg}";
 		
 		// now, figure out which user(s) are interested in this message, and put it on
 		// all the appropriate queues
 		Set<Map.Entry<String, Deque<Map>>> entries = eventQueues.entrySet();
-		println "got entrySet from eventQueues object: ${entries}";
+		//println "got entrySet from eventQueues object: ${entries}";
 		TxMudConnection conn = null;
 		if(entries.size()>0){
 			conn = DirectConnectionManagerService.getConnection();
 		}
 		for( Map.Entry<String, Deque<Map>> entry : entries )
 		{
-			println "entry: ${entry}";
-			println "key: ${entry.getKey()}";
+			//println "entry: ${entry}";
+			//println "key: ${entry.getKey()}";
 			
 			String key = entry.getKey();
 			
@@ -78,37 +78,37 @@ class EventQueueService
 			
 			// TODO: don't offer message unless the owner of this queue
 			// and the event creator, are friends (or the owner *is* the creator)
-			println "msg creator: ${msg.creator}";
+			//println "msg creator: ${msg.creator}";
 			User msgCreator = userService.findUserByUserId( msg.creator, conn);
 			if( msgCreator )
 			{
-				println "found User object for ${msgCreator.userId}";
+				//println "found User object for ${msgCreator.userId}";
 			}
 			
 			//FriendCollection friendCollection = FriendCollection.findByOwnerUuid( msgCreator.uuid );
 			FriendCollection friendCollection = LocalFriendService.findFriendCollectionByOwnerUuid( msgCreator.uuid, conn );
-			if( friendCollection )
-			{
-				println "got a valid friends collection for ${msgCreator.userId}";
-			}
+//			if( friendCollection )
+//			{
+//				println "got a valid friends collection for ${msgCreator.userId}";
+//			}
 			
 			Set<String> friends = friendCollection.friends;
-			if( friends )
-			{
-				println "got valid friends set: ${friends}";
-				for( String friend : friends )
-				{
-					println "friend: ${friend}";
-				}
-			}
+//			if( friends )
+//			{
+//				println "got valid friends set: ${friends}";
+//				for( String friend : friends )
+//				{
+//					println "friend: ${friend}";
+//				}
+//			}
 			User targetUser = userService.findUserByUserId( key, conn );
 			if( friends.contains( targetUser.uuid ) || msgCreator.uuid.equals( targetUser.uuid ) )
 			{
-				println "match found, offering message";
+				//println "match found, offering message";
 				Deque<Map> userQueue = entry.getValue();
 				if( msg instanceof Map )
 				{
-					println "MapMessage being offered";
+					//println "MapMessage being offered";
 					userQueue.offerFirst( msg );
 				}
 				else
@@ -133,7 +133,7 @@ class EventQueueService
 			conn.commit();
 			DirectConnectionManagerService.returnConnection(conn);
 		}
-		println "done processing eventQueue instances";
+		//println "done processing eventQueue instances";
 	}
 	
 	public long getQueueSizeForUser( final String userId )
@@ -152,12 +152,12 @@ class EventQueueService
 	
 	public List<Map> getMessagesForUser( final String userId, final int msgCount )
 	{
-		println "getting messages for user: ${userId}, msgCount: ${msgCount}";
+		//println "getting messages for user: ${userId}, msgCount: ${msgCount}";
 		List<Map> messages = new ArrayList<Map>();
 		Deque<Map> userQueue = eventQueues.get( userId );
 		if( userQueue != null )
 		{
-			println "got userQueue for user ${userId}";
+			//println "got userQueue for user ${userId}";
 			for( int i = 0; i < msgCount; i++ )
 			{
 				// get message from queue, put it in return set	
@@ -172,7 +172,7 @@ class EventQueueService
 	
 	public void registerEventQueueForUser( final String userId )
 	{
-		println "registering eventqueue for user: ${userId}";
+		//println "registering eventqueue for user: ${userId}";
 		
 		if( !eventQueues.containsKey( userId ))
 		{

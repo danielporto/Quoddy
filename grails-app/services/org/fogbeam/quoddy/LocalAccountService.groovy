@@ -22,7 +22,7 @@ class LocalAccountService
 		try{
 			rs = stmt.executeQuery();
 			if(rs.next()){
-				println "we found a local account with userId: " + userId
+				//println "we found a local account with userId: " + userId
 				account = new LocalAccount(rs.getString("uuid"),userId,rs.getString("password"));
 				account.id=rs.getInt("id");
 				account.version=rs.getInt("version");

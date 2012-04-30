@@ -12,19 +12,19 @@ import txstore.scratchpad.rdbms.util.quoddy.*;
 class LocalFriendService 
 {
 	def directConnectionManagerService; 
-	
 	//added
 	public static FriendCollection findFriendCollectionByOwnerUuid( final String uuid, Connection conn )
 	{
 		//String sql = "select id, version, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+uuid+"'";
 		FriendCollection friendsCollection = null;
+		//long startTime = System.nanoTime();
 		String sql = "select id, date_created,	owner_uuid	from friend_collection 	where	owner_uuid='"+uuid+"'";
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		ResultSet rs = null;
 		try{
 			rs = stmt.executeQuery();
 			if(rs.next()){
-				println "we find a friend collection with " + uuid;
+				//println "we find a friend collection with " + uuid;
 				friendsCollection = new FriendCollection(dateCreated:rs.getDate("date_created"),ownerUuid:rs.getString("owner_uuid"));
 				friendsCollection.id=rs.getInt("id");
 			}else{
@@ -37,6 +37,8 @@ class LocalFriendService
 		stmt.close();
 		rs.close();
 		
+		//long endTime = System.nanoTime();
+		//System.out.println("get friend collection in " + (endTime - startTime)*0.000001 + " ms");
 
 		friendsCollection.friends= new HashSet<String>();
 		sql="select friend_collection_id , friends_string from friend_collection_friends where friend_collection_id="+friendsCollection.id;
@@ -51,6 +53,7 @@ class LocalFriendService
 		}
 		stmt.close();
 		rs.close();
+		//System.out.println("get all friends string in " + (System.nanoTime()-endTime)*0.000001 + " ms");
 		return 	friendsCollection;
 	}
 
@@ -288,7 +291,7 @@ class LocalFriendService
 	
 	public void addToFriends( final User currentUser, final User newFriend )
 	{
-		println "UserService.addTofriends: ${currentUser.userId} / ${newFriend.userId}";
+		//println "UserService.addTofriends: ${currentUser.userId} / ${newFriend.userId}";
 		
 		//FriendRequestCollection friendRequests = FriendRequestCollection.findByOwnerUuid( newFriend.uuid );
 		FriendRequestCollection friendRequests = null;
@@ -361,7 +364,7 @@ class LocalFriendService
 			User friend = userService.findUserByUuid(friendUuid, conn);
 			friends.add( friend );
 		}
-		println "returning friends: ${friends}";
+		//println "returning friends: ${friends}";
 		return friends;
 	}
 	
@@ -373,6 +376,7 @@ class LocalFriendService
 		// select ownerUuid from IFollowCollection where iFollow contains user.uuid 
 		// from Item item join item.labels lbls where 'hello' in (lbls)
 		TxMudConnection conn = DirectConnectionManagerService.getConnection();
+		//long startTime = System.nanoTime();
 		
 //		String sql = "select id,version,date_created,owner_uuid from ifollow_collection inner join ifollow_collection_i_follow ifollow1_ on id=ifollow1_.ifollow_collection_id"+ 
 //				" where '"+user.uuid+"' in (ifollow1_.i_follow_string)";
@@ -410,7 +414,7 @@ class LocalFriendService
 		
 		//set shadow operaration
 		try{
-			System.out.println("Set empty shadow op for list followers");
+			//System.out.println("Set empty shadow op for list followers");
 			DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 			conn.setShadowOperation(dEm, 0);
 		} catch (IOException e) {
@@ -418,6 +422,7 @@ class LocalFriendService
 		}
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
+		//System.out.println("get my followers in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 		return followers;
 	}
 	
@@ -488,14 +493,14 @@ class LocalFriendService
 		}
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
-				
+		//System.out.println("get i follow in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 		return peopleIFollow;
 	}
 	
 	public List<FriendRequest> listOpenFriendRequests( final User user )
 	{
 		List<FriendRequest> openFriendRequests = new ArrayList<FriendRequest>();
-		
+		//long startTime = System.nanoTime();
 		TxMudConnection conn = DirectConnectionManagerService.getConnection();
 		//FriendRequestCollection friendRequestCollection = FriendRequestCollection.findByOwnerUuid( user.uuid );
 		FriendRequestCollection friendRequestCollection = this.findFriendRequestCollectionByOwnerUuid( user.uuid, conn);
@@ -513,7 +518,7 @@ class LocalFriendService
 		//set shadow operation
 		
 		try{
-			System.out.println("Set empty shadow op for list pending friend request");
+			//System.out.println("Set empty shadow op for list pending friend request");
 			DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 			conn.setShadowOperation(dEm, 0);
 		} catch (IOException e) {
@@ -521,6 +526,7 @@ class LocalFriendService
 		}
 		conn.commit();
 		DirectConnectionManagerService.returnConnection(conn);
+		//System.out.println("get open friend requests in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 		return openFriendRequests;		
 	}
 

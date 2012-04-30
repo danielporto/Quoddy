@@ -35,7 +35,7 @@ class UserListService
 				
 		if(needToCommit){
 			try{
-				System.out.println("Set empty shadow op for getting list for users");
+				//System.out.println("Set empty shadow op for getting list for users");
 				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 				conn.setShadowOperation(dEm, 0);
 			} catch (IOException e) {
@@ -88,7 +88,7 @@ class UserListService
 		
 		List<Activity> recentActivities = new ArrayList<Activity>();
 	
-		Calendar cal = Calendar.getInstance();
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		cal.add(Calendar.HOUR_OF_DAY, -600 );
 		Date cutoffDate = cal.getTime();
 	

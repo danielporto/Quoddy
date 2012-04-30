@@ -6,10 +6,10 @@
         <nav:resources />
         <link rel="stylesheet" type="text/css" href="${createLinkTo(dir:'css', file:'main.css')}" />
         <link rel="stylesheet" type="text/css" href="${createLinkTo(dir:'css', file:'bootstrap.min.css')}" />
-        <link rel="stylesheet" type="text/css" href="/css/reset-min.css">
-        <link rel="stylesheet" type="text/css" href="/css/fonts-min.css">             
-        <link rel="stylesheet" type="text/css" href="/css/grids-min.css">
-        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.3.0/build/cssgrids/grids-min.css" />
+        <link rel="stylesheet" type="text/css" href="/quoddy/css/reset-min.css">
+        <link rel="stylesheet" type="text/css" href="/quoddy/css/fonts-min.css">             
+        <link rel="stylesheet" type="text/css" href="/quoddy/css/grids-min.css">
+        <!--<linkrel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.3.0/build/cssgrids/grids-min.css" />  -->
        
         
         <g:javascript library="jquery-1.4" />

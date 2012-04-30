@@ -239,7 +239,9 @@ CREATE TABLE `event_base` (
   `_SP_clock` varchar(100) default "0-0",
 
   PRIMARY KEY (`id`),
-  KEY `FK3AA3DD56D1B1E9A7` (`owner_id`)
+  KEY `FK3AA3DD56D1B1E9A7` (`owner_id`),
+  KEY `eventTargetUuid` (`target_uuid`),
+  KEY `effectDate` (`effective_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -331,7 +333,8 @@ CREATE TABLE `friend_collection` (
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY (`owner_uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -387,7 +390,8 @@ CREATE TABLE `friend_request_collection` (
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `friendrequestuuid` (`owner_uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -413,7 +417,8 @@ CREATE TABLE `friend_request_collection_friend_requests` (
   `_SP_del` bool default false, 
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
-  KEY `FK85236D95D7D78385` (`friend_request_collection_id`)
+  KEY `FK85236D95D7D78385` (`friend_request_collection_id`),
+  KEY `friendrequestStr` (`friend_requests_string`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -477,7 +482,8 @@ CREATE TABLE `ifollow_collection` (
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `ifollowuuid` (`owner_uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -503,7 +509,8 @@ CREATE TABLE `ifollow_collection_i_follow` (
   `_SP_del` bool default false, 
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
-  KEY `FKCBB19A6372B54A5A` (`ifollow_collection_id`)
+  KEY `FKCBB19A6372B54A5A` (`ifollow_collection_id`),
+  KEY `ifollowstring` (`i_follow_string`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -589,7 +596,8 @@ CREATE TABLE `local_account` (
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `lcusername` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1011,7 +1019,8 @@ CREATE TABLE `share_target` (
   `_SP_ts` int default 0,
   `_SP_clock` varchar(100) default "0-0",
 
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `shareuuid` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1290,7 +1299,8 @@ CREATE TABLE `uzer` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`),
   KEY `FK370612AC44CB52` (`current_status_id`),
-  KEY `FK370612A2139300` (`profile_id`)
+  KEY `FK370612A2139300` (`profile_id`),
+  KEY `useruuid` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

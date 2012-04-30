@@ -32,7 +32,7 @@ class UserStreamService
 		rs.close();
 		if(needToCommit){
 			try{
-				System.out.println("Set empty shadow op for getting system defined streams for user");
+				//System.out.println("Set empty shadow op for getting system defined streams for user");
 				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 				conn.setShadowOperation(dEm, 0);
 			} catch (IOException e) {
@@ -95,7 +95,7 @@ class UserStreamService
 		rs.close();
 		if(needToCommit){
 			try{
-				System.out.println("Set empty shadow op for getUserDefined streams for users");
+				//System.out.println("Set empty shadow op for getUserDefined streams for users");
 				DBQUODDYShdEmpty dEm = DBQUODDYShdEmpty.createOperation();
 				conn.setShadowOperation(dEm, 0);
 			} catch (IOException e) {
