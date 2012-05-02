@@ -147,7 +147,7 @@ class StatusController {
 			
 			
 			//println "sending message to JMS";
-			jmsService.send( queue: 'uitestActivityQueue', msg, 'standard', null );
+			//jmsService.send( queue: 'uitestActivityQueue', msg, 'standard', null );
 			
 		}
 		
