@@ -11,8 +11,10 @@ class BootStrap {
 	def directConnectionManagerService;
 	def init = { servletContext ->
      
+		directConnectionManagerService.setParameters();
 		directConnectionManagerService.initDatabasePool();
 		directConnectionManagerService.init();
+		
 		//println "get only the original database";
 		//System.exit(0);
 		 switch( Environment.current )

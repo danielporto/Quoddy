@@ -47,7 +47,7 @@ class ActivityStreamController
 			page = "1";
 		}
 		//println "getContentHtml requested page: ${page}";
-		def activities = new ArrayList<Activity>();
+		def activities = null;
 		if( user != null )
 		{
 			user = userService.findUserByUserId( session.user.userId );

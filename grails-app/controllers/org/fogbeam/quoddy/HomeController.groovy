@@ -14,7 +14,7 @@ class HomeController {
 		long startTime = System.nanoTime();
     	def userId = params.userId;
     	def user = null;
-		def activities = new ArrayList<Activity>();
+		def activities = null;
 		def systemDefinedStreams = new ArrayList<UserStream>();
 		def userDefinedStreams = new ArrayList<UserStream>(); 
 		def userLists = new ArrayList<UserList>();

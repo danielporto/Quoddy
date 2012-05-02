@@ -71,7 +71,8 @@ class StatusController {
 			
 			// TODO: if the user update was successful
 			
-			Activity activity = new Activity(content:newStatus.text);
+			Activity activity = new Activity();
+			activity.content = newStatus.text;
 			activity.id=DirectConnectionManagerService.getEventBaseIdAndIncrement();
 			//ShareTarget streamPublic = ShareTarget.findByName( ShareTarget.STREAM_PUBLIC );
 			sql="select id, name, uuid from	share_target where name='"+ShareTarget.STREAM_PUBLIC+"'";
@@ -189,7 +190,7 @@ class StatusController {
 			stmt.close();
 			rs.close();
 			//sql = "select creator_id, id,version,creator_id,date_created,text from status_update where creator_id=" + row1.id;
-			sql = "select creator_id, id,creator_id,date_created,text from status_update where creator_id=" + id;
+			sql = "select creator_id, id,creator_id,date_created,text from status_update where creator_id=" + id + " limit 20";
 			stmt = conn.prepareStatement(sql);
 			try{
 				rs = stmt.executeQuery();
