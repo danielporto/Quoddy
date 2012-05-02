@@ -313,8 +313,14 @@ class ActivityStreamService {
 								objectUrl:rs.getString("eventbase0_1_.object_url"),objectContent:rs.getString("eventbase0_1_.object_content"),objectDisplayName:rs.getString("eventbase0_1_.object_display_name"),objectObjectType:rs.getString("eventbase0_1_.object_object_type"),objectImageUrl:rs.getString("eventbase0_1_.object_image_url"),
 								objectImageHeight:rs.getString("eventbase0_1_.object_image_height"),objectImageWidth:rs.getString("eventbase0_1_.object_image_width"),targetUrl:rs.getString("eventbase0_1_.target_url"),targetContent:rs.getString("eventbase0_1_.target_content"),targetDisplayName:rs.getString("eventbase0_1_.target_display_name"),
 								targetObjectType:rs.getString("eventbase0_1_.target_object_type"),targetImageUrl:rs.getString("eventbase0_1_.target_image_url"),targetImageHeight:rs.getString("eventbase0_1_.target_image_height"),targetImageWidth:rs.getString("eventbase0_1_.target_image_width"),generatorUrl:rs.getString("eventbase0_1_.generator_url"),providerUrl:rs.getString("eventbase0_1_.provider_url")));*/
-							recentActivities.add(new Activity(id:rs.getInt(1),owner:owner1, dateCreated:rs.getDate(2), effectiveDate:rs.getDate(3)));
+							//recentActivities.add(new Activity(id:rs.getInt("eventbase0_.id"),owner:owner1, dateCreated:rs.getDate("eventbase0_.date_created"), effectiveDate:rs.getDate("eventbase0_.effective_date")));
+							Activity ac = new Activity();
+							ac.id = rs.getInt(1);
+							ac.owner = owner1;
+							ac.dateCreated = rs.getDate(2);
+							ac.effectiveDate = rs.getDate(3);
 							//recentActivities.add(new Activity(id:rs.getInt(1),owner:owner1, dateCreated:rs.getDate(2), effectiveDate:rs.getDate(3)));
+							recentActivities.add(ac);
 							}
 						//System.out.println("=====> get recent activity result in " + (System.nanoTime()-startTime)*0.000001 + " ms");
 						//println "adding ${queryResults.size()} activities read from DB";

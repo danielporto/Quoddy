@@ -14,6 +14,8 @@ import txstore.proxy.ApplicationInterface;
 import txstore.proxy.ClosedLoopProxy;
 import applications.microbenchmark.TxMudTest.ExecuteScratchpadFactory;
 import txstore.scratchpad.rdbms.util.quoddy.*;
+import java.util.concurrent.locks.Condition
+import java.util.concurrent.locks.ReentrantLock
 
 class DirectConnectionManagerService {
 
@@ -55,7 +57,7 @@ class DirectConnectionManagerService {
 				System.exit(-1);
 			}
 			String[] tmp = strLine.split(" ");
-			dcId = Integer.parseInt(tmp[1])
+			dcId = Integer.parseInt(tmp[1]);
 			proxyId = Integer.parseInt(tmp[3]);
 			totalproxies = Integer.parseInt(tmp[5]);
 			dcCount = Integer.parseInt(tmp[7]);
@@ -68,7 +70,7 @@ class DirectConnectionManagerService {
 	
 	static void configuration(){
 		setParameters();
-		proxy = new QUODDY_TxMud_Proxy(dcId, proxyId, 10, "quoddy_txmud.xml", dcCount, 0, "quoddy_txmud_db.xml", 10);
+		proxy = new QUODDY_TxMud_Proxy(dcId, proxyId, 10, "/var/tmp/quoddy_txmud.xml", dcCount, 0, "/var/tmp/quoddy_txmud_db.xml", 10);
 		globalProxyId = proxy.getMyGlobalProxyId();
 		delta = totalproxies;
 		System.out.println("I am dcId " + dcId + " proxyId " + proxyId + " totaldc " + dcCount + " totalproxy " +totalproxies +" my global id " + globalProxyId);

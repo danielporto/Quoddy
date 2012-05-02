@@ -147,15 +147,15 @@ class StatusController {
 			DirectConnectionManagerService.commitAndReturn(conn)
 			//=======
 			
-			Map msg = new HashMap();
-			msg.creator = activity.owner.userId;
-			msg.text = newStatus.text;
-			msg.targetUuid = activity.targetUuid;
-			msg.originTime = activity.dateCreated.time;
+			//Map msg = new HashMap();
+			//msg.creator = activity.owner.userId;
+			//msg.text = newStatus.text;
+			//msg.targetUuid = activity.targetUuid;
+			//msg.originTime = activity.dateCreated.time;
 			
 			
 			//println "sending message to JMS";
-			jmsService.send( queue: 'uitestActivityQueue', msg, 'standard', null );
+			//jmsService.send( queue: 'uitestActivityQueue', msg, 'standard', null );
 			
 		}
 		
@@ -198,7 +198,7 @@ class StatusController {
 			stmt.close();
 			rs.close();
 			//sql = "select creator_id, id,version,creator_id,date_created,text from status_update where creator_id=" + row1.id;
-			sql = "select creator_id, id,creator_id,date_created,text from status_update where creator_id=" + id;
+			sql = "select creator_id, id,creator_id,date_created,text from status_update where creator_id=" + id + " limit 20";
 			stmt = conn.prepareStatement(sql);
 			try{
 				rs = stmt.executeQuery();
