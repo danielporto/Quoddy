@@ -94,7 +94,7 @@ class DirectConnectionManagerService {
 					e.printStackTrace();
 				}
 			}
-			System.out.println("+++++get Connection available pool size: " +(availableConnPool.size()-1));
+			//System.out.println("+++++get Connection available pool size: " +(availableConnPool.size()-1));
 			conn = availableConnPool.pop();
 		}finally{
 			spQueueLock.unlock();
@@ -118,7 +118,7 @@ class DirectConnectionManagerService {
 		try{
 			availableConnPool.push(conn);
 			spQueueCond.signal();
-			System.out.println("-----return Connection available connection pool size: " + availableConnPool.size());
+			//System.out.println("-----return Connection available connection pool size: " + availableConnPool.size());
 		}finally{
 			spQueueLock.unlock();
 		}
